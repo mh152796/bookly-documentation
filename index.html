@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookly App - Customization Documentation</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <h1>Bookly App Documentation</h1>
+    <p>Welcome to the official customization documentation for Bookly. Please follow the setup guide below before modifying the source code.</p>
+
+    <section id="prerequisites">
+        <h2>1. Prerequisites</h2>
+        <p>For optimal compatibility and performance, we highly recommend using the exact versions listed below.</p>
+        
+        <div class="prereq-grid">
+            <div class="prereq-card">
+                <strong>Flutter SDK</strong>
+                3.38.x
+            </div>
+            <div class="prereq-card">
+                <strong>Java Version</strong>
+                Java 21.0.9
+            </div>
+            <div class="prereq-card">
+                <strong>CocoaPods</strong>
+                Min: 1.16.2
+            </div>
+            <div class="prereq-card">
+                <strong>Xcode</strong>
+                26
+            </div>
+            <div class="prereq-card">
+                <strong>Supported IDEs</strong>
+                Android Studio / VS Code
+            </div>
+        </div>
+
+        <div class="alert">
+            <strong>Important:</strong> It is highly recommended to use <strong>Java 21.0.9</strong> for your Android projects to avoid build errors and ensure optimal compatibility with the app's dependencies.
+        </div>
+    </section>
+
+    <section id="environment-setup">
+        <h2>2. Environment Setup</h2>
+        <p>Select your operating system below to view the setup instructions.</p>
+
+        <div class="tabs">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="openTab('windows')">Windows</button>
+                <button class="tab-btn" onclick="openTab('mac')">macOS</button>
+                <button class="tab-btn" onclick="openTab('linux')">Linux</button>
+            </div>
+
+            <div id="windows" class="tab-content active">
+                <h3>Android Studio Setup</h3>
+                <ul class="step-list">
+                    <li>Download Android Studio from the <a href="https://developer.android.com/studio" target="_blank">official page</a>. We recommend setting your system Java environment to <strong>Java 21.0.9</strong>.</li>
+                    <li>Run the downloaded executable (e.g., <code>android-studio-ide-&lt;version&gt;-windows.exe</code>) and follow the installation wizard.</li>
+                    <li>Launch Android Studio and allow it to download additional SDK components.</li>
+                    <li><em>Optional:</em> Set up an emulator through the AVD (Android Virtual Device) Manager.</li>
+                </ul>
+
+                <h3>Flutter SDK Setup</h3>
+                <ul class="step-list">
+                    <li>Download the latest stable Windows release from the <a href="https://docs.flutter.dev/get-started/install/windows" target="_blank">Flutter download page</a>.</li>
+                    <li>Extract the zip file to a location on your machine (e.g., <code>C:\flutter</code>).</li>
+                    <li><strong>Add to System Path:</strong> Right-click "This PC" &gt; Properties &gt; Advanced system settings &gt; Environment Variables. Find the "Path" variable, click Edit, and add your <code>flutter\bin</code> directory path.</li>
+                    <li>Open Command Prompt and run <code>flutter doctor</code> to verify installation.</li>
+                </ul>
+
+                <h3>IDE Configuration</h3>
+                <ul class="step-list">
+                    <li>Open Android Studio.</li>
+                    <li>Go to <strong>File &gt; Settings &gt; Plugins &gt; Marketplace</strong>.</li>
+                    <li>Search for and install both the <strong>Flutter</strong> and <strong>Dart</strong> plugins.</li>
+                    <li>Restart Android Studio.</li>
+                </ul>
+
+                <a href="https://www.youtube.com/watch?v=hfz_AraTk_k&t=1s" target="_blank" class="video-btn">▶ Watch Windows Setup Video</a>
+            </div>
+
+            <div id="mac" class="tab-content">
+                <h3>Android Studio Setup</h3>
+                <ul class="step-list">
+                    <li>Download Android Studio from the <a href="https://developer.android.com/studio" target="_blank">official page</a>. We recommend setting your system Java environment to <strong>Java 21.0.9</strong>.</li>
+                    <li>Open the downloaded DMG file and drag Android Studio into the <strong>Applications</strong> folder.</li>
+                    <li>Launch Android Studio and complete the Setup Wizard, allowing it to install additional SDKs.</li>
+                </ul>
+
+                <h3>Flutter SDK Setup</h3>
+                <ul class="step-list">
+                    <li>Download the latest stable macOS release from the <a href="https://docs.flutter.dev/get-started/install/macos" target="_blank">Flutter download page</a>.</li>
+                    <li>Open a terminal and extract the archive: <code>tar xf flutter_macos_&lt;version&gt;.tar.xz</code></li>
+                    <li>Move the extracted folder to your preferred location: <code>sudo mv flutter /YOUR_DIRECTORY</code></li>
+                    <li>Add the <code>flutter/bin</code> directory to your system's PATH variable in your shell profile (e.g., `.zshrc` or `.bash_profile`).</li>
+                    <li>Open a new terminal and run <code>flutter doctor</code> to verify installation.</li>
+                </ul>
+
+                <h3>IDE Configuration</h3>
+                <ul class="step-list">
+                    <li>Open Android Studio.</li>
+                    <li>Go to <strong>Android Studio &gt; Preferences &gt; Plugins &gt; Marketplace</strong>.</li>
+                    <li>Search for and install both the <strong>Flutter</strong> and <strong>Dart</strong> plugins.</li>
+                    <li>Restart Android Studio.</li>
+                </ul>
+
+                <a href="https://www.youtube.com/watch?v=f09c-nw15K8" target="_blank" class="video-btn">▶ Watch macOS Setup Video</a>
+            </div>
+
+            <div id="linux" class="tab-content">
+                <h3>Android Studio Setup</h3>
+                <ul class="step-list">
+                    <li>Download Android Studio from the <a href="https://developer.android.com/studio" target="_blank">official page</a>. We recommend setting your system Java environment to <strong>Java 21.0.9</strong>.</li>
+                    <li>Open a terminal, navigate to your download directory, and extract the archive: <code>tar -xvzf android-studio-ide-&lt;version&gt;-linux.tar.gz</code></li>
+                    <li>Move the folder to your preferred location: <code>sudo mv android-studio /YOUR_DIRECTORY</code></li>
+                    <li>Navigate to the bin directory (<code>cd /YOUR_DIRECTORY/android-studio/bin</code>) and run <code>./studio.sh</code> to start the setup wizard.</li>
+                </ul>
+
+                <h3>Flutter SDK Setup</h3>
+                <ul class="step-list">
+                    <li>Download the latest stable Linux release from the <a href="https://docs.flutter.dev/get-started/install/linux" target="_blank">Flutter download page</a>.</li>
+                    <li>Extract the archive: <code>tar xf flutter_linux_&lt;version&gt;.tar.xz</code></li>
+                    <li>Move the extracted folder: <code>sudo mv flutter /YOUR_DIRECTORY</code></li>
+                    <li>Add the <code>flutter/bin</code> directory to your system's PATH variable in your shell profile.</li>
+                    <li>Open a new terminal and run <code>flutter doctor</code> to verify installation.</li>
+                </ul>
+
+                <h3>IDE Configuration</h3>
+                <ul class="step-list">
+                    <li>Open Android Studio.</li>
+                    <li>Go to <strong>File &gt; Settings &gt; Plugins &gt; Marketplace</strong>.</li>
+                    <li>Search for and install both the <strong>Flutter</strong> and <strong>Dart</strong> plugins.</li>
+                    <li>Restart Android Studio.</li>
+                </ul>
+
+                <a href="https://www.youtube.com/watch?v=e63OlW_2gpQ" target="_blank" class="video-btn">▶ Watch Linux Setup Video</a>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="change-android-package-name">
+        <h2>3. Change Android Package Name</h2>
+        <p>First, you have to find out the existing <code>applicationId</code>. You can find it out from the top of the <code>/android/app/build.gradle.kts</code> file.</p>
+        <p>Now select the application ID and press <kbd>command</kbd> + <kbd>shift</kbd> + <kbd>r</kbd> or for Windows <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>r</kbd>, place your preferred package name in the replace input box, and then click on the <strong>Replace All</strong> button.</p>
+        
+        <div class="image-gallery">
+            <img src="assets/package_name_change_sc_1.png" alt="Screenshot showing how to select the application ID">
+            <img src="assets/package_name_change_sc_2.png" alt="Screenshot showing the Replace All step">
+        </div>
+    </section>
+
+    <section id="firebase-setup">
+        <h2>4. Firebase Setup</h2>
+        
+        <div class="alert">
+            <strong>Important:</strong> You should only add the Firebase JSON file. There is no need to change any other files in the project like <code>build.gradle</code> or others.
+        </div>
+
+        <p>Watch the videos below for a complete setup guide:</p>
+        
+        <ul class="step-list">
+            <li>
+                <strong>Easy way using CLI:</strong>
+                <br>
+                <a href="https://www.youtube.com/watch?v=GvrcrsTOiIY" target="_blank">Setup Flutter Firebase using FlutterFire CLI</a>
+            </li>
+            <li>
+                <strong>Manual setup:</strong>
+                <br>
+                <a href="https://www.youtube.com/watch?v=bZNjqnI2xiM" target="_blank">How to Setup Firebase in Flutter 2025 || Flutter Firebase Setup for Android and IOS</a>
+            </li>
+        </ul>
+    </section>
+
+    <section id="social-sign-in-config">
+        <h2>5. Social Sign In Config</h2>
+        <p>To enable social authentication methods for your app, you need to configure the providers in your Firebase console.</p>
+        
+        <ul class="step-list">
+            <li>Go to the <a href="https://console.firebase.google.com/u/0/" target="_blank">Firebase Console</a> and select your previously created project.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/firebase_project_page.png" alt="Firebase Project Page">
+        </div>
+
+        <ul class="step-list">
+            <li>Tap <strong>Authentication</strong> from the left menu.</li>
+            <li>Select the <strong>Sign-in method</strong> tab.</li>
+            <li>From the <strong>Sign-in providers</strong> section, you need to enable the desired authentication methods.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/provider_select_page.png" alt="Sign-in Providers Section">
+        </div>
+
+        <ul class="step-list">
+            <li>Enable <strong>Google</strong>, <strong>Apple</strong>, and <strong>Email/Password</strong> providers.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/provider_eneble_page_google.png" alt="Enable Google Sign-In">
+            <img src="assets/provider_eneble_page_apple.png" alt="Enable Apple Sign-In">
+            <img src="assets/provider_eneble_page_email_pass.png" alt="Enable Email/Password Sign-In">
+        </div>
+
+        <div class="alert">
+            <strong>Apple Sign-In for Android:</strong> An additional configuration is required to successfully implement Apple Sign-In for Android devices.
+        </div>
+        
+        <p>You need to place your Apple Service ID and Redirect URL in the project configuration file located at <code>lib/core/config/app_config.dart</code>.</p>
+        <div class="image-gallery">
+            <img src="assets/apple_android_config.png" alt="Apple Android Config Code Snippet">
+        </div>
+
+        <p>For detailed instructions on how to set up your Service ID and Redirect URL, please follow this guide:</p>
+        <ul class="step-list">
+            <li>
+                <a href="https://medium.com/@selvarajmani/implementing-apple-id-sign-up-and-login-for-flutter-android-and-java-be-using-rest-based-redirect-9ed594846acf" target="_blank">Implementing Apple ID Sign-Up and Login for Flutter Android</a>
+            </li>
+        </ul>
+    </section>
+
+    <section id="change-app-name">
+        <h2>6. Change App Name</h2>
+        <p>You need to set your app name in three different places: within your application's localization files, Android manifest, and iOS configuration file.</p>
+        
+        <h3>Localization Files</h3>
+        <ul class="step-list">
+            <li>Go to <code>&lt;project&gt;/lib/core/localization</code>.</li>
+            <li>Open <code>en_us.dart</code>, find <code>app_name</code>, and replace the value "Bookly" with your preferred app name.</li>
+            <li>Follow the same process for <code>bn_bd.dart</code> and <code>ar_sa.dart</code>, placing your preferred app name in the respective files.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/app_name_change_en.png" alt="Change app name in en_us.dart">
+            <img src="assets/app_name_change_bn.png" alt="Change app name in bn_bd.dart">
+            <img src="assets/app_name_change_ar.png" alt="Change app name in ar_sa.dart">
+        </div>
+
+        <h3>Android</h3>
+        <ul class="step-list">
+            <li>Open <code>&lt;project&gt;/android/app/src/main/AndroidManifest.xml</code>.</li>
+            <li>Change the value of the <code>android:label</code> property.</li>
+        </ul>
+<pre><code>android:label="YOUR_APP_NAME"</code></pre>
+        <div class="image-gallery">
+            <img src="assets/manifest_app_name_change.png" alt="Change app name in Android Manifest">
+        </div>
+
+        <h3>iOS</h3>
+        <ul class="step-list">
+            <li>Open <code>&lt;project&gt;/ios/Runner/Info.plist</code>.</li>
+            <li>Update the value directly below the <code>CFBundleName</code> key.</li>
+        </ul>
+<pre><code>&lt;key&gt;CFBundleName&lt;/key&gt;
+&lt;string&gt;YOUR_APP_NAME&lt;/string&gt;</code></pre>
+        <div class="image-gallery">
+            <img src="assets/info_plist_app_name_change.png" alt="Change app name in iOS Info.plist">
+        </div>
+    </section>
+
+    <section id="change-app-logo-icon">
+        <h2>7. Change App Logo / Placeholder Image and Icon</h2>
+        <p>To change the App logo and App Icon, you need to follow these steps:</p>
+
+        <h3>App Logo & Placeholder Image</h3>
+        <ul class="step-list">
+            <li>Go to <code>&lt;project&gt;/assets/images/</code> and replace <code>bookly_logo.png</code> and <code>place_holder_image.jpg</code> with your own images.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/logo_and_place_holder_image.png" alt="Logo and Placeholder Image file locations">
+        </div>
+
+        <div class="alert">
+            <strong>Note:</strong> Please use the exact file names as described; otherwise, it will not work.
+        </div>
+
+        <h3>App Icon</h3>
+        <p>You can generate your app icon using the tools shown in this tutorial:</p>
+        <ul class="step-list">
+            <li>
+                <a href="https://www.youtube.com/watch?v=oRBWPm7nCV0" target="_blank">How to generate an App Icon</a>
+            </li>
+        </ul>
+
+        <ul class="step-list">
+            <li><strong>For Android:</strong> Go to <code>/android/app/src/main/res</code> and replace all <code>mipmap</code> folders with your <code>&lt;generated icon&gt;/android</code> folder.</li>
+            <li><strong>For iOS:</strong> Go to <code>/ios/Runner</code> and replace the existing <code>Assets.xcassets</code> folder with your generated <code>Assets.xcassets</code> folder.</li>
+        </ul>
+    </section>
+
+    <section id="api-customization">
+        <h2>8. API Customization</h2>
+        <p>To connect the Bookly app to your own backend server, you must update the API endpoint configurations.</p>
+        
+        <ul class="step-list">
+            <li>Navigate to <code>&lt;project&gt;/lib/core/network</code> and open the <code>api_endpoints.dart</code> file.</li>
+            <li>Replace the default <code>baseUrl</code> and <code>searchApi</code> strings with your own backend URLs.</li>
+            <li>Update the remaining API paths (like <code>homeApi</code>, <code>categoriesApi</code>, etc.) to match your backend routing structure.</li>
+        </ul>
+
+        <div class="alert">
+            <strong>Important:</strong> Ensure that your custom backend API returns responses in the exact same JSON format and data structure as the default Bookly API, otherwise the app will not parse the data correctly.
+        </div>
+    </section>
+
+    <section id="localization-language-customization">
+        <h2>9. Localization (Language Customization)</h2>
+        <p>Bookly supports multi-language capabilities. You can easily add new languages, remove existing ones, or set a default app language by following these steps.</p>
+
+        <h3>Add a New Language</h3>
+        <ul class="step-list">
+            <li>Go to <code>&lt;project&gt;/lib/core/localization/translations</code>.</li>
+            <li>Create a new Dart file modeled after an existing one (e.g., if you are adding French, you can name it <code>fr_fr.dart</code>).</li>
+            <li>Copy the code structure from an existing translation file (like <code>en_us.dart</code>) into your new file.</li>
+            <li>Rename the map variable (e.g., from <code>enUS</code> to <code>frFR</code>), and translate all the string values on the right side of the colons to your new language.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/language_file.png" alt="Language translation file structure">
+        </div>
+
+        <ul class="step-list">
+            <li>Once your translation file is ready, navigate to <code>&lt;project&gt;/lib/core/localization/config/language_config.dart</code>.</li>
+            <li>Locate the <code>languages</code> list inside the <code>LanguageConfig</code> class.</li>
+            <li>Add a new <code>LanguageModel</code> block to this list, filling in your language name, country code, and referencing the translation map variable you just created.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/language_config.png" alt="Language Configuration list">
+        </div>
+
+        <h3>Set the Default Language</h3>
+        <ul class="step-list">
+            <li>The app automatically uses the <strong>first language</strong> in the <code>languages</code> list as the default.</li>
+            <li>To set your preferred language as the default, simply move its corresponding <code>LanguageModel</code> to the very top of the list in <code>language_config.dart</code>.</li>
+        </ul>
+
+        <h3>Remove a Language</h3>
+        <ul class="step-list">
+            <li>To remove a language from the app, open <code>language_config.dart</code> and delete its <code>LanguageModel</code> from the list.</li>
+            <li>For clean code, you can also delete the corresponding translation Dart file from the <code>translations</code> folder.</li>
+        </ul>
+    </section>
+
+    <section id="admob-customization">
+        <h2>10. AdMob Customization</h2>
+        <p>To start earning revenue through ads, you need to integrate your own AdMob Unit IDs for both Android and iOS.</p>
+
+        <div class="alert-danger">
+            <strong>CRITICAL WARNING:</strong> For development, you <strong>do not</strong> need to set up your real AdMob account. You must only configure AdMob with your real production IDs right before publishing your app to the App Store or Play Store. If you run the app during development and testing using your live production AdMob configuration, it will generate invalid traffic and your AdMob account will likely be <strong>permanently suspended</strong>. Always use Google's provided test IDs during development.
+        </div>
+
+        <h3>Update AdMob Unit IDs</h3>
+        <ul class="step-list">
+            <li>Open the configuration file located at <code>&lt;project&gt;/lib/core/config/app_config.dart</code>.</li>
+            <li>Locate the AdMob variables section within the <code>AppConfig</code> class.</li>
+            <li>Replace the default test IDs with your own production AdMob Unit IDs for both Banner and Rewarded ads.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/abmob_file.png" alt="AdMob Configuration File">
+        </div>
+
+        <div class="alert">
+            <strong>Need help creating Ad Unit IDs?</strong><br><br>
+            If you do not have an AdMob account or need help generating Ad Unit IDs, you can watch the video below for a clear understanding of the account creation process.
+            <br><br>
+            <em>Note: The video below shows complete ad integration coding for Flutter. You <strong>only</strong> need to watch it to understand how to create your AdMob account, add your apps, and generate your Banner and Rewarded Ad Unit IDs. Do not follow the coding steps in the video, as the ad implementation is already fully integrated into the app.</em>
+        </div>
+
+        <ul class="step-list">
+            <li>
+                <a href="https://www.youtube.com/watch?v=PNYRO5srvFc&t=1086s" target="_blank">How to Create AdMob Account and Ad Unit IDs</a>
+            </li>
+        </ul>
+
+        <h3>Update AdMob Application IDs</h3>
+        <p>In addition to the Unit IDs, you must configure your AdMob Application IDs in the native Android and iOS configuration files.</p>
+        
+        <ul class="step-list">
+            <li><strong>Android:</strong> Open <code>&lt;project&gt;/android/app/src/main/AndroidManifest.xml</code>.</li>
+            <li>Locate the <code>&lt;meta-data&gt;</code> tag for the AdMob Application ID and replace the value with your actual Android AdMob App ID.</li>
+        </ul>
+<pre><code>&lt;meta-data
+    android:name="com.google.android.gms.ads.APPLICATION_ID"
+    android:value="ca-app-pub-3940256099942544~3347511713"/&gt;</code></pre>
+        <div class="image-gallery">
+            <img src="assets/admob_manifest_config.png" alt="AdMob Application ID in Android Manifest">
+        </div>
+
+        <ul class="step-list">
+            <li><strong>iOS:</strong> Open <code>&lt;project&gt;/ios/Runner/Info.plist</code>.</li>
+            <li>Locate the <code>GADApplicationIdentifier</code> key and replace the string value with your actual iOS AdMob App ID.</li>
+        </ul>
+<pre><code>&lt;key&gt;GADApplicationIdentifier&lt;/key&gt;
+&lt;string&gt;ca-app-pub-3940256099942544~1458002511&lt;/string&gt;</code></pre>
+        <div class="image-gallery">
+            <img src="assets/admob_info_plist_config.png" alt="AdMob Application ID in iOS Info.plist">
+        </div>
+
+    </section>
+
+    <section id="in-app-purchase-customization">
+        <h2>11. In-App Purchase Configuration (RevenueCat)</h2>
+        <p>Bookly uses RevenueCat to handle In-App Purchases (subscriptions and one-time purchases) seamlessly across Android and iOS platforms. Follow these steps to configure your products.</p>
+
+        <h3>Update RevenueCat API Keys</h3>
+        <ul class="step-list">
+            <li>Open your app configuration file at <code>&lt;project&gt;/lib/core/config/app_config.dart</code>.</li>
+            <li>Replace the <code>revenuecatAndroidKey</code> and <code>revenuecatIOSKey</code> values with your actual API keys from your RevenueCat dashboard.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/revenue_cat_app_config.png" alt="RevenueCat App Configuration">
+        </div>
+
+        <h3>Create Products in Google Play Console (and App Store)</h3>
+        <ul class="step-list">
+            <li>Log into your Google Play Console (and repeat similarly for App Store Connect).</li>
+            <li>Create an In-App Product for your one-time purchase.</li>
+            <li>Create a Subscription for your recurring plans.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/play_console_inapp_product.png" alt="Google Play Console One-Time Product">
+            <img src="assets/playconsole_inapp_subscription.png" alt="Google Play Console Subscription Product">
+        </div>
+
+        <h3>Connect Stores to RevenueCat</h3>
+        <ul class="step-list">
+            <li>Before importing products, ensure your app stores (Google Play & App Store Connect) are properly linked to RevenueCat.</li>
+            <li>Follow the official guide here: <a href="https://www.revenuecat.com/docs/projects/connect-a-store#app-configuration" target="_blank">RevenueCat - Connect an App Store</a>.</li>
+        </ul>
+
+        <h3>Import Products & Configure Offerings in RevenueCat</h3>
+        <ul class="step-list">
+            <li>Import the products you created in the Play Console/App Store into your RevenueCat account.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/revenue_cat_product.png" alt="Imported Products in RevenueCat">
+        </div>
+
+        <ul class="step-list">
+            <li>Set up your <strong>Entitlements</strong>.</li>
+            <li><strong>CRITICAL:</strong> Ensure that your <em>Entitlement Identifier</em> in RevenueCat matches exactly what is shown in the screenshot below.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/revenue_cat_entitle_ment.png" alt="RevenueCat Entitlements Setup">
+        </div>
+
+        <ul class="step-list">
+            <li>Configure your <strong>Offerings</strong>.</li>
+            <li><strong>CRITICAL:</strong> Ensure that your <em>Offering IDs</em> in RevenueCat match exactly what is defined in your <code>app_config.dart</code> file (e.g., <code>bookly_subscriptions</code> and <code>bookly_onetime</code>).</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/revenue_cat_offering_page.png" alt="RevenueCat Offerings Overview">
+            <img src="assets/revenue_cat_subscription_product_offering.png" alt="RevenueCat Subscription Offering">
+            <img src="assets/revenue_cat_offering_onetime.png" alt="RevenueCat One-Time Offering">
+        </div>
+
+    </section>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
