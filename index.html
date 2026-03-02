@@ -18,7 +18,7 @@
         <div class="prereq-grid">
             <div class="prereq-card">
                 <strong>Flutter SDK</strong>
-                3.38.x
+                Min: 3.38.x
             </div>
             <div class="prereq-card">
                 <strong>Java Version</strong>
@@ -30,7 +30,7 @@
             </div>
             <div class="prereq-card">
                 <strong>Xcode</strong>
-                26
+                Min: 16.x
             </div>
             <div class="prereq-card">
                 <strong>Supported IDEs</strong>
@@ -40,6 +40,10 @@
 
         <div class="alert">
             <strong>Important:</strong> It is highly recommended to use <strong>Java 21.0.9</strong> for your Android projects to avoid build errors and ensure optimal compatibility with the app's dependencies.
+        </div>
+
+        <div class="alert" style="margin-top: 25px;">
+            <strong>Need Help?</strong> If you are facing any version-related issues, please reach out to us directly! We are happy to help you. <a href="#support"><strong>Go to the Support Section &rarr;</strong></a>
         </div>
     </section>
 
@@ -65,7 +69,7 @@
 
                 <h3>Flutter SDK Setup</h3>
                 <ul class="step-list">
-                    <li>Download the latest stable Windows release from the <a href="https://docs.flutter.dev/get-started/install/windows" target="_blank">Flutter download page</a>.</li>
+                    <li>Download the latest stable Windows release from the <a href="https://docs.flutter.dev/install/manual" target="_blank">Flutter download page</a>.</li>
                     <li>Extract the zip file to a location on your machine (e.g., <code>C:\flutter</code>).</li>
                     <li><strong>Add to System Path:</strong> Right-click "This PC" &gt; Properties &gt; Advanced system settings &gt; Environment Variables. Find the "Path" variable, click Edit, and add your <code>flutter\bin</code> directory path.</li>
                     <li>Open Command Prompt and run <code>flutter doctor</code> to verify installation.</li>
@@ -92,7 +96,7 @@
 
                 <h3>Flutter SDK Setup</h3>
                 <ul class="step-list">
-                    <li>Download the latest stable macOS release from the <a href="https://docs.flutter.dev/get-started/install/macos" target="_blank">Flutter download page</a>.</li>
+                    <li>Download the latest stable macOS release from the <a href="https://docs.flutter.dev/install/manual" target="_blank">Flutter download page</a>.</li>
                     <li>Open a terminal and extract the archive: <code>tar xf flutter_macos_&lt;version&gt;.tar.xz</code></li>
                     <li>Move the extracted folder to your preferred location: <code>sudo mv flutter /YOUR_DIRECTORY</code></li>
                     <li>Add the <code>flutter/bin</code> directory to your system's PATH variable in your shell profile (e.g., `.zshrc` or `.bash_profile`).</li>
@@ -121,7 +125,7 @@
 
                 <h3>Flutter SDK Setup</h3>
                 <ul class="step-list">
-                    <li>Download the latest stable Linux release from the <a href="https://docs.flutter.dev/get-started/install/linux" target="_blank">Flutter download page</a>.</li>
+                    <li>Download the latest stable Linux release from the <a href="https://docs.flutter.dev/install/manual" target="_blank">Flutter download page</a>.</li>
                     <li>Extract the archive: <code>tar xf flutter_linux_&lt;version&gt;.tar.xz</code></li>
                     <li>Move the extracted folder: <code>sudo mv flutter /YOUR_DIRECTORY</code></li>
                     <li>Add the <code>flutter/bin</code> directory to your system's PATH variable in your shell profile.</li>
@@ -139,6 +143,10 @@
                 <a href="https://www.youtube.com/watch?v=e63OlW_2gpQ" target="_blank" class="video-btn">▶ Watch Linux Setup Video</a>
             </div>
 
+        </div>
+
+        <div class="alert" style="margin-top: 25px;">
+            <strong>Need Help?</strong> If you are facing any environment setup related issues, directly reach out to us! We are happy to help you. <a href="#support"><strong>Go to the Support Section &rarr;</strong></a>
         </div>
     </section>
 
@@ -505,8 +513,93 @@
 
     </section>
 
+    <section id="build-and-release">
+        <h2>12. Build and Release</h2>
+
+        <h3>Build for Android (APK)</h3>
+        <p>Run the following command to build the APK:</p>
+<pre><code>flutter build apk</code></pre>
+        <p>This command will compile your Flutter code and generate the APK file. You can find the APK in the <code>build/app/outputs/flutter-apk</code> directory inside your project folder. The APK file will be named something like <code>app-release.apk</code> or <code>app-debug.apk</code>.</p>
+
+        <h3>Prepare for Google Play Store (App Bundle)</h3>
+        <p>Before deploying to the Play Store, additional configuration is needed. You must create an upload keystore.</p>
+
+        <p><strong>1. Create an upload keystore</strong></p>
+        <p>Run the following command at the command line. On macOS or Linux, use the following command:</p>
+<pre><code>keytool -genkey -v -keystore ~/upload-keystore.jks -keyalg RSA \
+        -keysize 2048 -validity 10000 -alias upload</code></pre>
+        
+        <p>On Windows, use the following command in PowerShell:</p>
+<pre><code>keytool -genkey -v -keystore $env:USERPROFILE\upload-keystore.jks `
+        -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 `
+        -alias upload</code></pre>
+
+        <div class="alert">
+            <strong>Important:</strong> After running this keystore generation command, you need to enter some information. Make sure the keystore password is set carefully.
+        </div>
+
+        <p><strong>2. Replace the Keystore File</strong></p>
+        <p>After generating <code>upload-keystore.jks</code>, replace the existing project <code>bookly-keystore.jks</code> with your new <code>upload-keystore.jks</code> in the <code>&lt;project&gt;/android/app</code> directory.</p>
+        <div class="image-gallery">
+            <img src="assets/jks_file_location.png" alt="JKS File Location">
+        </div>
+
+        <p><strong>3. Update Key Properties</strong></p>
+        <p>Update <code>storePassword</code>, <code>keyPassword</code>, and <code>storeFile</code> with your own credentials in <code>&lt;project&gt;/android/key.properties</code>.</p>
+        <div class="image-gallery">
+            <img src="assets/key_properties_file.png" alt="Key Properties File">
+        </div>
+
+        <p><strong>4. Update App Version</strong></p>
+        <p>Update your app version in <code>&lt;project&gt;/android/app/build.gradle.kts</code>.</p>
+        <div class="image-gallery">
+            <img src="assets/app_build_gradle_file.png" alt="App Build Gradle File">
+        </div>
+
+        <p><strong>5. Generate the App Bundle</strong></p>
+        <p>Now you have completed all the release configurations. Generate the app bundle using the following command:</p>
+<pre><code>flutter build appbundle</code></pre>
+        <p>After a successful build, you will find your app bundle in <code>&lt;project&gt;/build/app/outputs/bundle/release/app-release.aab</code>. Now you can upload it to your Google Play Console.</p>
+        <div class="image-gallery">
+            <img src="assets/app_bundle_location.png" alt="App Bundle Location">
+        </div>
+
+        <h3>Build for iOS</h3>
+        <p>There is no general way to generate apps for iOS locally without the Apple ecosystem. Apple doesn’t allow you to install apps via direct download. If you want to install it on your iOS device for testing, you can run it directly using Xcode. For deploying to production, please follow the official Flutter documentation here: <a href="https://docs.flutter.dev/deployment/ios" target="_blank">https://docs.flutter.dev/deployment/ios</a></p>
+
+        <h4>Run on a Physical iOS Device</h4>
+        <ul class="step-list">
+            <li><strong>Configure Xcode:</strong> Open Xcode and go to <em>Xcode > Settings... > Accounts</em>. Sign in with your Apple ID (create a free account at developer.apple.com if needed). Add your Apple ID and select your team (usually your personal name for free accounts).</li>
+            <li><strong>Enable Developer Mode (iOS 16 and later):</strong> On your iOS device, go to <em>Settings > Privacy & Security</em>. Scroll to <em>Developer Mode</em> and toggle it ON. Restart the device if prompted.</li>
+            <li><strong>Trust the Developer:</strong> Connect your iOS device to your Mac via a USB cable. On the device, you may see a prompt to “Trust This Computer?” Tap <em>Trust</em> and enter your passcode. In Xcode, open <em>Window > Devices and Simulators</em>. Select your device and ensure it’s listed as connected.</li>
+            <li><strong>Verify Device Detection:</strong> Run the following command in your terminal:
+<pre><code>flutter devices</code></pre>
+            This lists your iOS device (e.g., iPhone 14 (ios)). If the device doesn’t appear, check the USB connection and ensure Xcode recognizes the device.</li>
+            <li><strong>Run the App:</strong> In your Flutter project directory, run:
+<pre><code>flutter run</code></pre>
+            If multiple devices are connected, specify the device:
+<pre><code>flutter run -d iPhone-14</code></pre>
+            </li>
+        </ul>
+
+        <h4>Example: Running on an iPhone 13</h4>
+        <ul class="step-list">
+            <li>Connect the iPhone to your Mac.</li>
+            <li>Enable Developer Mode in <em>Settings > Privacy & Security</em>.</li>
+            <li>Trust the computer when prompted.</li>
+            <li>Run <code>flutter devices</code> to confirm detection (e.g., <em>iPhone 13 (ios)</em>).</li>
+            <li>Execute:
+<pre><code>flutter run -d iPhone-13</code></pre>
+            </li>
+        </ul>
+
+        <div class="alert">
+            <strong>Helpful Resource:</strong> For a more detailed guide on running Flutter on physical devices, check out this excellent article: <a href="https://mailharshkhatri.medium.com/running-flutter-on-a-physical-device-75e84f9ac430" target="_blank">Running Flutter on a Physical Device</a>.
+        </div>
+    </section>
+
     <section id="support">
-        <h2>12. Support</h2>
+        <h2>13. Support</h2>
         <p>If you need help, reach out using any of the channels below.</p>
         <ul class="step-list">
             <li>
@@ -521,6 +614,14 @@
                 LinkedIn:
                 <a href="https://www.linkedin.com/in/mosaraf-hossain-73504b1b4/" target="_blank" rel="noopener">Mosaraf Hossain</a>
             </li>
+        </ul>
+    </section>
+
+    <section id="changelog">
+        <h2>14. Changelog</h2>
+        <h3 style="color: var(--primary); margin-bottom: 10px;">Version 1.0.0 – 25 Mar 2026</h3>
+        <ul class="step-list">
+            <li>Initial Release</li>
         </ul>
     </section>
 
