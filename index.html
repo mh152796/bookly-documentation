@@ -157,10 +157,58 @@
         <h2>4. Firebase Setup</h2>
         
         <div class="alert">
-            <strong>Important:</strong> You should only add the Firebase JSON file. There is no need to change any other files in the project like <code>build.gradle</code> or others.
+            <strong>Important:</strong> You should only add the downloaded Firebase JSON/Plist file. There is no change needed in any other files in the project like <code>build.gradle</code> or others.
         </div>
 
-        <p>Watch the videos below for a complete setup guide:</p>
+        <h3>Step 1: Create a Firebase Project</h3>
+        <ul class="step-list">
+            <li>Go to <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a>.</li>
+            <li>You will see <strong>"Get started by setting up a firebase project"</strong> or <strong>"Create a new Firebase project"</strong>. Click there.</li>
+            <li>Enter your project name, check the Firebase terms checkbox, and click <strong>Continue</strong>.</li>
+            <li>Click <strong>Continue</strong> after finishing each step/page until you see the "project preparing" page.</li>
+            <li>It takes a little time to prepare your project. When the project is ready, click <strong>Continue</strong>. This will navigate you to the project overview page.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/firebase_landing_page.png" alt="Firebase Landing Page">
+            <img src="assets/firebase_project_creation_01.png" alt="Firebase Project Creation Step 1">
+            <img src="assets/firebase_project_creation_02.png" alt="Firebase Project Creation Step 2">
+            <img src="assets/firebase_project_creation_03.png" alt="Firebase Project Creation Step 3">
+            <img src="assets/firebase_project_creation_04.png" alt="Firebase Project Creation Step 4">
+            <img src="assets/firebase_project_creation_05.png" alt="Firebase Project Creation Step 5">
+        </div>
+
+        <h3>Step 2: Add Android App</h3>
+        <ul class="step-list">
+            <li>From the Project Overview page, find the option to <strong>Add app</strong> and click it.</li>
+            <li>Select <strong>Android</strong>.</li>
+            <li>Give your package name and click <strong>Register app</strong>.</li>
+            <li>Download the <code>google-services.json</code> file.</li>
+            <li>Replace the existing file with your downloaded file in <code>&lt;project&gt;/android/app/google-services.json</code>.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/firebase_add_app_01.png" alt="Firebase Add App Icon">
+            <img src="assets/firebase_add_app_02.png" alt="Firebase Add App Menu">
+            <img src="assets/firebase_add_app_android_01.png" alt="Firebase Add Android App Step 1">
+            <img src="assets/firebase_add_app_android_02.png" alt="Firebase Add Android App Step 2">
+        </div>
+
+        <h3>Step 3: Add iOS App</h3>
+        <ul class="step-list">
+            <li>Go back to <strong>Add app</strong> and select <strong>iOS</strong>.</li>
+            <li>Add your iOS <code>bundleId</code> and click <strong>Register app</strong>.</li>
+            <li>Download the <code>GoogleService-Info.plist</code> file.</li>
+            <li>Replace the existing file with your downloaded file in <code>&lt;project&gt;/ios/Runner/GoogleService-Info.plist</code>.</li>
+        </ul>
+        <div class="image-gallery">
+            <img src="assets/firebase_add_app_ios_01.png" alt="Firebase Add iOS App Step 1">
+            <img src="assets/firebase_add_app_ios_02.png" alt="Firebase Add iOS App Step 2">
+            <img src="assets/firebase_json_plist_setup_in_project.png" alt="Firebase JSON and Plist setup in project directory">
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 30px 0;">
+
+        <h3>Video Tutorials</h3>
+        <p>If you prefer a visual guide, you can also watch the videos below for a complete setup walkthrough:</p>
         
         <ul class="step-list">
             <li>
