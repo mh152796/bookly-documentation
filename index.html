@@ -398,22 +398,24 @@
         </ul>
     </section>
 
-    <section id="admob-customization">
+        <section id="admob-customization">
         <h2>10. AdMob Customization</h2>
         <p>To start earning revenue through ads, you need to integrate your own AdMob Unit IDs for both Android and iOS.</p>
 
         <div class="alert-danger">
-            <strong>CRITICAL WARNING:</strong> For development, you <strong>do not</strong> need to set up your real AdMob account. You must only configure AdMob with your real production IDs right before publishing your app to the App Store or Play Store. If you run the app during development and testing using your live production AdMob configuration, it will generate invalid traffic and your AdMob account will likely be <strong>permanently suspended</strong>. Always use Google's provided test IDs during development.
+            <strong>CRITICAL WARNING:</strong> For development, you <strong>do not</strong> need to set up your real AdMob account. You must only configure AdMob with your real production IDs right before publishing your app to the App Store or Play Store. If you run the app during development and testing using your live production AdMob configuration, it will generate invalid traffic and your AdMob account will likely be <strong>permanently suspended</strong>. 
+            <br><br>The app is pre-configured to automatically use Google's provided test IDs during debug mode, ensuring your account remains safe while developing.
         </div>
 
         <h3>Update AdMob Unit IDs</h3>
+        <p>The app configuration uses a conditional check (<code>kDebugMode</code>) to automatically switch between Test IDs (during development) and Production IDs (when live).</p>
         <ul class="step-list">
             <li>Open the configuration file located at <code>&lt;project&gt;/lib/core/config/app_config.dart</code>.</li>
             <li>Locate the AdMob variables section within the <code>AppConfig</code> class.</li>
-            <li>Replace the default test IDs with your own production AdMob Unit IDs for both Banner and Rewarded ads.</li>
+            <li>Replace the <strong>production value</strong> (the string after the colon <code>:</code>) with your actual AdMob Unit IDs for Banner and Rewarded ads. Leave the first string as the test ID.</li>
         </ul>
         <div class="image-gallery">
-            <img src="assets/abmob_file.png" alt="AdMob Configuration File">
+            <img src="assets/abmob_file.jpg" alt="AdMob Configuration File">
         </div>
 
         <div class="alert">
@@ -430,25 +432,23 @@
         </ul>
 
         <h3>Update AdMob Application IDs</h3>
-        <p>In addition to the Unit IDs, you must configure your AdMob Application IDs in the native Android and iOS configuration files.</p>
+        <p>In addition to the Unit IDs, you must configure your AdMob <strong>Application IDs</strong> in the native Android and iOS configuration files.</p>
         
         <ul class="step-list">
-            <li><strong>Android:</strong> Open <code>&lt;project&gt;/android/app/src/main/AndroidManifest.xml</code>.</li>
-            <li>Locate the <code>&lt;meta-data&gt;</code> tag for the AdMob Application ID and replace the value with your actual Android AdMob App ID.</li>
+            <li><strong>Android:</strong> Open <code>&lt;project&gt;/android/app/build.gradle.kts</code>.</li>
+            <li>Scroll down to the <code>buildTypes</code> section.</li>
+            <li>Inside the <code>getByName("release")</code> block, locate <code>manifestPlaceholders["admobAppId"]</code> and replace the value with your actual Android AdMob App ID. <em>(You can leave the one under the "debug" block as the default Google test ID).</em></li>
         </ul>
-<pre><code>&lt;meta-data
-    android:name="com.google.android.gms.ads.APPLICATION_ID"
-    android:value="ca-app-pub-3940256099942544~3347511713"/&gt;</code></pre>
         <div class="image-gallery">
-            <img src="assets/admob_manifest_config.png" alt="AdMob Application ID in Android Manifest">
+            <img src="assets/build_gradle_admob_app_id.jpg" alt="AdMob Application ID in Android build.gradle.kts">
         </div>
 
         <ul class="step-list">
             <li><strong>iOS:</strong> Open <code>&lt;project&gt;/ios/Runner/Info.plist</code>.</li>
-            <li>Locate the <code>GADApplicationIdentifier</code> key and replace the string value with your actual iOS AdMob App ID.</li>
+            <li>Locate the <code>GADApplicationIdentifier</code> key and replace the string value directly below it with your actual iOS AdMob App ID.</li>
         </ul>
 <pre><code>&lt;key&gt;GADApplicationIdentifier&lt;/key&gt;
-&lt;string&gt;ca-app-pub-3940256099942544~1458002511&lt;/string&gt;</code></pre>
+&lt;string&gt;YOUR_IOS_ADMOB_APP_ID&lt;/string&gt;</code></pre>
         <div class="image-gallery">
             <img src="assets/admob_info_plist_config.png" alt="AdMob Application ID in iOS Info.plist">
         </div>
@@ -617,9 +617,20 @@
         </ul>
     </section>
 
-    <section id="changelog">
+        <section id="changelog">
         <h2>14. Changelog</h2>
-        <h3 style="color: var(--primary); margin-bottom: 10px;">Version 1.0.0 – 3 Mar 2026</h3>
+
+        <h3 style="color: var(--primary); margin-bottom: 10px;">Version 1.1.0 – 14 Mar 2026</h3>
+        <ul class="step-list">
+            <li><strong>New:</strong> Added attractive in-app version update dialog.</li>
+            <li><strong>New:</strong> Custom home promotional banner dialog for free users.</li>
+            <li><strong>New:</strong> Anti-screenshot protection added for ebooks.</li>
+            <li><strong>Improvement:</strong> UI/UX refinements for a smoother user experience.</li>
+            <li><strong>Improvement:</strong> Core engine optimized for much faster book loading.</li>
+            <li><strong>Fix:</strong> Resolved reader layout issues on specific devices.</li>
+        </ul>
+
+        <h3 style="color: var(--primary); margin-bottom: 10px; margin-top: 30px;">Version 1.0.0 – 3 Mar 2026</h3>
         <ul class="step-list">
             <li>Initial Release</li>
         </ul>
