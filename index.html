@@ -3,13 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookly App - Customization Documentation</title>
+    <title>Bookly - Customization Documentation</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
     <h1>Bookly App Documentation</h1>
     <p>Welcome to the official customization documentation for Bookly. Please follow the setup guide below before modifying the source code.</p>
+
+    <div class="alert">
+        <strong>What is in this package:</strong> the Flutter mobile app, the NestJS backend API, and the Next.js admin panel.
+        <ul class="step-list" style="margin-top: 10px;">
+            <li><strong>Sections 1&ndash;12</strong> cover the mobile app.</li>
+            <li><strong>Section 13</strong> covers the <a href="#backend-setup">backend API</a>.</li>
+            <li><strong>Section 14</strong> covers the <a href="#admin-panel-setup">admin panel</a>.</li>
+            <li><strong>Sections 15&ndash;16</strong> are the <a href="#api-reference">API reference</a> and <a href="#database-schema">database schema</a>.</li>
+            <li><strong>Section 17</strong> is the <a href="#faq">FAQ and common build errors</a> &mdash; check here first if something will not build.</li>
+        </ul>
+        <strong>Setting up for the first time?</strong> Start with the <a href="#backend-setup">backend (section 13)</a>, then the <a href="#admin-panel-setup">admin panel (section 14)</a>, then come back to section 1 for the app. The app and admin panel both need a running backend.
+    </div>
 
     <section id="prerequisites">
         <h2>1. Prerequisites</h2>
@@ -598,8 +610,1070 @@
         </div>
     </section>
 
+    <section id="backend-setup">
+        <h2>13. Backend Setup (NestJS API)</h2>
+        <p>The backend powers both the mobile app and the admin panel. Set this up <strong>first</strong> &mdash; the app and admin panel cannot run without it.</p>
+
+        <div class="prereq-grid">
+            <div class="prereq-card">
+                <strong>Node.js</strong>
+                20 LTS or newer
+            </div>
+            <div class="prereq-card">
+                <strong>PostgreSQL</strong>
+                14 or newer
+            </div>
+            <div class="prereq-card">
+                <strong>Process Manager</strong>
+                PM2 (production)
+            </div>
+            <div class="prereq-card">
+                <strong>Stack</strong>
+                NestJS 11 + TypeORM
+            </div>
+        </div>
+
+        <h3>Step 1: Install dependencies</h3>
+        <ul class="step-list">
+            <li>Extract the backend folder onto your server or local machine.</li>
+            <li>Open a terminal in that folder and run:
+<pre><code>npm ci</code></pre>
+            </li>
+        </ul>
+
+        <h3>Step 2: Create the database</h3>
+        <ul class="step-list">
+            <li>Create an empty PostgreSQL database:
+<pre><code>createdb bookly</code></pre>
+            </li>
+            <li>Or from inside <code>psql</code>:
+<pre><code>CREATE DATABASE bookly;</code></pre>
+            </li>
+        </ul>
+
+        <h3>Step 3: Configure your environment</h3>
+        <ul class="step-list">
+            <li>Copy the example file:
+<pre><code>cp .env.example .env</code></pre>
+            </li>
+            <li>Open <code>.env</code> and fill in the required values below. Every other variable is optional &mdash; the matching feature simply stays switched off until you configure it.</li>
+        </ul>
+
+        <table class="doc-table">
+            <thead>
+                <tr><th>Variable</th><th>What to set</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>DB_HOST</code><br><code>DB_PORT</code><br><code>DB_USER</code><br><code>DB_PASSWORD</code><br><code>DB_NAME</code></td>
+                    <td>Your PostgreSQL connection details.</td>
+                </tr>
+                <tr>
+                    <td><code>BASE_URL</code></td>
+                    <td>The public address of this API, with no trailing slash.<br>Example: <code>https://api.your-domain.com</code></td>
+                </tr>
+                <tr>
+                    <td><code>JWT_SECRET</code><br><code>REFRESH_TOKEN_SECRET</code></td>
+                    <td>Two <strong>different</strong> long random strings. Generate each with:<br><code>openssl rand -hex 48</code></td>
+                </tr>
+                <tr>
+                    <td><code>BOOTSTRAP_ADMIN_EMAIL</code><br><code>BOOTSTRAP_ADMIN_PASSWORD</code></td>
+                    <td>The first admin account. This is what you sign into the admin panel with.</td>
+                </tr>
+                <tr>
+                    <td><code>DB_SYNC</code></td>
+                    <td>Set to <code>true</code> for the very first run so the database tables are created for you.</td>
+                </tr>
+                <tr>
+                    <td><code>APP_LOCALES</code></td>
+                    <td>Active content languages, comma separated. Supported: <code>en</code>, <code>bn</code>, <code>ar</code>, <code>hi</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="alert-danger">
+            <strong>Never reuse the example secrets.</strong> <code>JWT_SECRET</code> and <code>REFRESH_TOKEN_SECRET</code> sign your users' login tokens. If you leave the placeholder values in place, anyone can forge a login for any account, including an administrator.
+        </div>
+
+        <h3>Step 4: First run</h3>
+        <ul class="step-list">
+            <li>Start the server:
+<pre><code>npm run start:dev</code></pre>
+            </li>
+            <li>On the first boot against an empty database the server creates the role rows and your administrator account. Look for this line in the console:
+<pre><code>Superadmin bootstrap complete for admin@your-domain.com</code></pre>
+            </li>
+            <li>Open <code>http://localhost:5008/api/docs</code> to confirm the API is running. You should see the Swagger documentation page.</li>
+        </ul>
+
+        <div class="alert-success">
+            <strong>Backend is live.</strong> You can now set up the admin panel (section 14) and point the mobile app at this API (section 8).
+        </div>
+
+        <h3>Step 5: Lock it down after the first login</h3>
+        <p>Once you have signed into the admin panel successfully, make these three changes in <code>.env</code> and restart the server:</p>
+        <ul class="step-list">
+            <li>Set <code>DB_SYNC=false</code>. Leaving it on lets schema changes be applied automatically, which you do not want on a live database.</li>
+            <li>Delete the <code>BOOTSTRAP_ADMIN_EMAIL</code> and <code>BOOTSTRAP_ADMIN_PASSWORD</code> lines. They are only needed once.</li>
+            <li>Change your administrator password from inside the admin panel.</li>
+        </ul>
+
+        <div class="alert">
+            <strong>Good to know:</strong> the bootstrap only runs while the database has no users at all. It will never overwrite an existing account, so leaving the variables in place is harmless &mdash; but removing them keeps the password out of your config file.
+        </div>
+
+        <h3>Step 6: File storage</h3>
+        <p>Book covers, avatars, banners and the book files themselves (EPUB/PDF) need somewhere to live. The backend picks a storage driver automatically &mdash; the first <strong>fully</strong> configured one wins:</p>
+        <ul class="step-list">
+            <li><strong>Cloudflare R2</strong> &mdash; recommended for production.</li>
+            <li><strong>Bunny.net</strong> &mdash; alternative CDN.</li>
+            <li><strong>Local disk</strong> &mdash; the fallback. Files go to the <code>uploads/</code> folder and are served from <code>/uploads/</code>. No configuration needed, which is why a fresh install works straight away.</li>
+        </ul>
+
+        <p>To use Cloudflare R2, fill in <strong>all</strong> of these in <code>.env</code>:</p>
+<pre><code>CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_R2_ACCESS_KEY_ID=
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=
+CLOUDFLARE_R2_BUCKET=
+CLOUDFLARE_R2_ENDPOINT=
+CLOUDFLARE_R2_PUBLIC_URL=</code></pre>
+
+        <div class="alert-danger">
+            <strong>Common mistake:</strong> if even one of those values is missing, R2 is skipped <em>silently</em> and the backend quietly falls back to local disk. There is no error message. If you expected files in your bucket but they keep appearing in the <code>uploads/</code> folder, check that all six values are filled in &mdash; especially <code>CLOUDFLARE_R2_PUBLIC_URL</code>, which is easy to overlook.
+        </div>
+
+        <h3>Step 7: Optional integrations</h3>
+        <p>All of these are switched off by default. The server starts and runs normally with every one of them unconfigured, so set up only what you need.</p>
+
+        <table class="doc-table">
+            <thead>
+                <tr><th>Feature</th><th>Variables</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Push notifications<br>Firebase sign-in</td>
+                    <td><code>FIREBASE_PROJECT_ID</code><br><code>FIREBASE_CLIENT_EMAIL</code><br><code>FIREBASE_PRIVATE_KEY</code></td>
+                    <td>Taken from your Firebase service-account JSON (Project settings &rarr; Service accounts). Use the same Firebase project you set up for the app in section 4.</td>
+                </tr>
+                <tr>
+                    <td>Email (OTP, password reset)</td>
+                    <td><code>MAIL_ENABLED</code><br><code>SMTP_HOST</code>, <code>SMTP_PORT</code><br><code>SMTP_USER</code>, <code>SMTP_PASS</code><br><code>SMTP_FROM</code></td>
+                    <td>Set <code>MAIL_ENABLED=true</code> to turn it on. Use <code>SMTP_SECURE=true</code> for port 465, <code>false</code> for 587.</td>
+                </tr>
+                <tr>
+                    <td>PipraPay payments</td>
+                    <td><code>PIPRAPAY_ENABLED</code><br><code>PIPRAPAY_API_KEY</code><br><code>PIPRAPAY_RETURN_URL</code><br><code>PIPRAPAY_WEBHOOK_URL</code></td>
+                    <td>Set <code>PIPRAPAY_ENABLED=true</code> to turn it on.</td>
+                </tr>
+                <tr>
+                    <td>In-app purchase receipts</td>
+                    <td><code>GOOGLE_PLAY_PACKAGE_NAME</code><br><code>APPLE_BUNDLE_ID</code>, <code>APPLE_ISSUER_ID</code><br><code>APPLE_KEY_ID</code>, <code>APPLE_PRIVATE_KEY</code></td>
+                    <td>Needed only if you sell through the App Store / Play Store. See section 11.</td>
+                </tr>
+                <tr>
+                    <td>Background jobs</td>
+                    <td><code>PG_BOSS_ENABLED</code><br><code>PG_BOSS_SCHEMA</code></td>
+                    <td>Used for scheduled work such as rental-expiry reminders. Without it the app falls back to in-process scheduling, which is fine for a single server.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="alert">
+            <strong>Firebase private key formatting:</strong> paste the key on a single line, wrapped in double quotes, keeping the <code>\n</code> escape sequences exactly as they appear in the JSON file:
+<pre><code>FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----\n"</code></pre>
+            If your hosting panel mangles that, use <code>FIREBASE_PRIVATE_KEY_BASE64</code> instead and paste the same key base64-encoded.
+        </div>
+
+        <h3>Step 8: Going live with PM2</h3>
+        <ul class="step-list">
+            <li>Build the project:
+<pre><code>npm ci
+npm run build</code></pre>
+            </li>
+            <li>Open <code>prod.config.js</code> and change <code>cwd</code> to the folder you deployed into.</li>
+            <li>Start it:
+<pre><code>pm2 start prod.config.js --env production</code></pre>
+            </li>
+            <li>Check the logs:
+<pre><code>pm2 logs bookly_backend --lines 30</code></pre>
+            </li>
+        </ul>
+
+        <div class="alert">
+            <strong>Where do the secrets go?</strong> <code>prod.config.js</code> contains no credentials by design. The app reads them from the <code>.env</code> file sitting in the folder named by <code>cwd</code>, so make sure your <code>.env</code> is uploaded there.
+        </div>
+
+        <h3>Step 9: nginx configuration</h3>
+        <p>If you serve the API through nginx, use the settings below. Both matter:</p>
+<pre><code>client_max_body_size 50m;
+
+location / {
+    proxy_pass http://127.0.0.1:5008;
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}</code></pre>
+        <ul class="step-list">
+            <li><code>client_max_body_size</code> must be at least as large as your <code>HTTP_BODY_LIMIT</code> (default <code>50mb</code>), otherwise book uploads fail with a <strong>413</strong> error.</li>
+            <li>The <code>X-Forwarded-For</code> header lets the backend see each visitor's real IP address. Without it every visitor looks like the same person to the rate limiter, and they all get blocked together.</li>
+        </ul>
+
+        <h3>Step 10: Security settings</h3>
+        <p>These are enabled out of the box. You may want to tune them for your deployment:</p>
+
+        <table class="doc-table">
+            <thead>
+                <tr><th>Variable</th><th>Default</th><th>What it does</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>CORS_ORIGINS</code></td>
+                    <td>empty</td>
+                    <td>Comma-separated list of web addresses allowed to call the API. Empty means any origin is allowed &mdash; fine locally, but in production set it to your admin panel's address. Mobile apps are unaffected either way.</td>
+                </tr>
+                <tr>
+                    <td><code>RATE_LIMIT_MAX</code><br><code>RATE_LIMIT_TTL</code></td>
+                    <td>120 per 60s</td>
+                    <td>General request limit per visitor.</td>
+                </tr>
+                <tr>
+                    <td><code>AUTH_RATE_LIMIT_MAX</code><br><code>AUTH_RATE_LIMIT_TTL</code></td>
+                    <td>20 per 60s</td>
+                    <td>Tighter limit on login, registration, OTP and password reset, to stop password-guessing attacks.</td>
+                </tr>
+                <tr>
+                    <td><code>PROTECT_BOOK_FILES</code></td>
+                    <td><code>false</code></td>
+                    <td>Set to <code>true</code> to add an expiring signature to book file links, so a link that leaks cannot be reused. Your apps need no changes for this &mdash; the signature travels inside the link.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="alert">
+            <strong>Paid books are already protected.</strong> Regardless of the setting above, the book file link is only ever given to a reader who has bought, rented or subscribed to that title. Free and ad-supported books remain open to everyone.
+        </div>
+
+        <h3>Troubleshooting</h3>
+        <table class="doc-table">
+            <thead>
+                <tr><th>Problem</th><th>Solution</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Warning at startup: <em>Firebase is not configured</em></td>
+                    <td>Normal if you have not set up push notifications. The server runs fine. Fill in the <code>FIREBASE_*</code> values to remove it.</td>
+                </tr>
+                <tr>
+                    <td>Cannot sign into the admin panel</td>
+                    <td>The admin account is only created when the database is completely empty. Check the startup logs for the <em>Superadmin bootstrap complete</em> line.</td>
+                </tr>
+                <tr>
+                    <td>No tables were created</td>
+                    <td><code>DB_SYNC=true</code> is required for the first run.</td>
+                </tr>
+                <tr>
+                    <td><strong>413</strong> error when uploading a book</td>
+                    <td>Raise <code>client_max_body_size</code> in nginx (see step 9).</td>
+                </tr>
+                <tr>
+                    <td><strong>429</strong> error when logging in</td>
+                    <td>Rate limit reached. Wait a minute, raise <code>AUTH_RATE_LIMIT_MAX</code>, or check that nginx forwards <code>X-Forwarded-For</code>.</td>
+                </tr>
+                <tr>
+                    <td>CORS errors in the admin panel</td>
+                    <td>Add the admin panel's address to <code>CORS_ORIGINS</code>.</td>
+                </tr>
+                <tr>
+                    <td>Files are not going to Cloudflare R2</td>
+                    <td>One of the six R2 values is missing. See the warning in step 6.</td>
+                </tr>
+                <tr>
+                    <td>Swagger shows the wrong address</td>
+                    <td>Set <code>SWAGGER_SERVER_URL</code> to your public API address.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="admin-panel-setup">
+        <h2>14. Admin Panel Setup (Next.js)</h2>
+        <p>The admin panel is where you manage books, authors, users, subscriptions and everything else in your store. Complete the backend setup (section 13) first &mdash; the panel is only a front-end for that API.</p>
+
+        <div class="prereq-grid">
+            <div class="prereq-card">
+                <strong>Node.js</strong>
+                20 LTS or newer
+            </div>
+            <div class="prereq-card">
+                <strong>Stack</strong>
+                Next.js 16 + React 19
+            </div>
+            <div class="prereq-card">
+                <strong>Requires</strong>
+                A running backend
+            </div>
+            <div class="prereq-card">
+                <strong>Default Port</strong>
+                3000 dev / 4000 live
+            </div>
+        </div>
+
+        <h3>Step 1: Install dependencies</h3>
+        <ul class="step-list">
+            <li>Extract the admin panel folder.</li>
+            <li>Open a terminal in that folder and run:
+<pre><code>npm ci</code></pre>
+            </li>
+        </ul>
+
+        <h3>Step 2: Point it at your backend</h3>
+        <ul class="step-list">
+            <li>Copy the example file:
+<pre><code>cp .env.example .env</code></pre>
+            </li>
+            <li>Open <code>.env</code> and set the three required values:</li>
+        </ul>
+
+        <table class="doc-table">
+            <thead>
+                <tr><th>Variable</th><th>What to set</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>NEXT_PUBLIC_API_URL</code></td>
+                    <td>Your backend address <strong>including <code>/api/v1</code></strong>.<br>Example: <code>https://api.your-domain.com/api/v1</code></td>
+                </tr>
+                <tr>
+                    <td><code>NEXT_PUBLIC_IMAGE_URL</code></td>
+                    <td>The address your uploaded files are served from, <strong>without</strong> any <code>/uploads</code> ending.<br>Local storage: <code>https://api.your-domain.com</code><br>Cloudflare R2 / Bunny: your CDN address</td>
+                </tr>
+                <tr>
+                    <td><code>NEXT_PUBLIC_APP_LOCALES</code></td>
+                    <td>Active languages, comma separated. Must match the backend's <code>APP_LOCALES</code> exactly.<br>Example: <code>en,bn,ar,hi</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="alert-danger">
+            <strong>These two are the most common setup mistakes &mdash; please read carefully:</strong>
+            <ul class="step-list" style="margin-top: 10px;">
+                <li><code>NEXT_PUBLIC_API_URL</code> <strong>must end in <code>/api/v1</code></strong>. Endpoint names are added directly onto this address, so if you leave the version off, every single request returns a <strong>404</strong> and the panel appears completely broken.</li>
+                <li><code>NEXT_PUBLIC_IMAGE_URL</code> <strong>must not end in <code>/uploads</code></strong>. The file paths already contain it, so adding it here produces addresses like <code>.../uploads/uploads/cover.jpg</code> and no images load.</li>
+            </ul>
+        </div>
+
+        <div class="alert">
+            <strong>A note on these settings:</strong> anything beginning with <code>NEXT_PUBLIC_</code> is built into the browser files, so never put a password or secret key in this file. You must also run <code>npm run build</code> again after changing any of them &mdash; editing <code>.env</code> alone will not update an already-built panel.
+        </div>
+
+        <h3>Step 3: Run it</h3>
+        <ul class="step-list">
+            <li>Start the development server:
+<pre><code>npm run dev</code></pre>
+            </li>
+            <li>Open <code>http://localhost:3000</code>.</li>
+            <li>Sign in with the <code>BOOTSTRAP_ADMIN_EMAIL</code> and <code>BOOTSTRAP_ADMIN_PASSWORD</code> you set in the backend's <code>.env</code> file.</li>
+        </ul>
+
+        <div class="alert-success">
+            <strong>You are in.</strong> Start by adding a few categories and authors, then add your first book. Change your password from the profile menu.
+        </div>
+
+        <h3>Step 4: Going live</h3>
+        <ul class="step-list">
+            <li>Build the panel:
+<pre><code>npm ci
+npm run build</code></pre>
+            </li>
+            <li>Start it directly:
+<pre><code>npm run start</code></pre>
+                This runs on port 4000. To use a different port, edit the <code>start</code> script in <code>package.json</code> (for example <code>next start -p 8080</code>).
+            </li>
+            <li>Or run it under PM2, which keeps it alive and restarts it after a reboot:
+<pre><code>pm2 start prod.config.js --env production</code></pre>
+                Remember to set <code>cwd</code> in <code>prod.config.js</code> to your deployment folder first.
+            </li>
+        </ul>
+
+        <div class="alert">
+            <strong>Do not forget the backend setting:</strong> once the panel is live, add its web address to <code>CORS_ORIGINS</code> in the <strong>backend's</strong> <code>.env</code> and restart the backend. Without this the browser blocks every request and the panel will not load any data.
+<pre><code>CORS_ORIGINS=https://admin.your-domain.com</code></pre>
+        </div>
+
+        <h3>What you can manage</h3>
+        <table class="doc-table">
+            <thead>
+                <tr><th>Section</th><th>What it covers</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Dashboard</td><td>Totals for users, books, authors, publishers and categories.</td></tr>
+                <tr><td>Books</td><td>Add and edit books, upload EPUB/PDF files and covers, set pricing, publish or unpublish.</td></tr>
+                <tr><td>Authors / Publishers / Catalog</td><td>Manage the people and categories behind your catalogue.</td></tr>
+                <tr><td>Users</td><td>View and manage accounts and their roles.</td></tr>
+                <tr><td>Subscription Plans &amp; Prices</td><td>Set up your plans, pricing and rental durations.</td></tr>
+                <tr><td>Book Sales / Subscription Sales</td><td>Review orders and active subscriptions.</td></tr>
+                <tr><td>Home &amp; Banners</td><td>Arrange the app home screen sections and promotional banners.</td></tr>
+                <tr><td>Notifications</td><td>Send push notifications to your users (requires Firebase).</td></tr>
+                <tr><td>Reviews</td><td>Moderate reader reviews and comments.</td></tr>
+                <tr><td>Legal Pages</td><td>Edit your Privacy Policy and Terms, which the app displays.</td></tr>
+                <tr><td>App Version</td><td>Control the in-app update prompt.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Multi-language content</h3>
+        <p>Books, authors, publishers and categories can hold a separate title and description per language. The language tabs shown in the panel come from <code>NEXT_PUBLIC_APP_LOCALES</code>.</p>
+        <div class="alert">
+            <strong>Keep both sides in sync.</strong> If the panel's <code>NEXT_PUBLIC_APP_LOCALES</code> and the backend's <code>APP_LOCALES</code> do not match, you may enter content in a language the backend then discards.
+        </div>
+
+        <h3>Troubleshooting</h3>
+        <table class="doc-table">
+            <thead>
+                <tr><th>Problem</th><th>Solution</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Every page is empty and all requests return 404</td>
+                    <td><code>NEXT_PUBLIC_API_URL</code> is missing the <code>/api/v1</code> ending. Fix it, then run <code>npm run build</code> again.</td>
+                </tr>
+                <tr>
+                    <td>Images and covers do not load</td>
+                    <td>Either <code>NEXT_PUBLIC_IMAGE_URL</code> wrongly ends in <code>/uploads</code>, or your image host is not allowed. For a separate CDN, add its hostname to <code>NEXT_PUBLIC_EXTRA_IMAGE_HOSTS</code>.</td>
+                </tr>
+                <tr>
+                    <td>Browser console shows CORS errors</td>
+                    <td>Add the panel's address to <code>CORS_ORIGINS</code> in the backend <code>.env</code> and restart the backend.</td>
+                </tr>
+                <tr>
+                    <td>Login says the details are wrong</td>
+                    <td>Use the <code>BOOTSTRAP_ADMIN_*</code> details from the backend <code>.env</code>. Confirm the backend created the account by checking its startup logs.</td>
+                </tr>
+                <tr>
+                    <td>Too many login attempts / 429</td>
+                    <td>The backend rate limiter has kicked in. Wait a minute and try again.</td>
+                </tr>
+                <tr>
+                    <td>Changing <code>.env</code> has no effect</td>
+                    <td>Settings are baked in when the panel is built. Run <code>npm run build</code> and restart.</td>
+                </tr>
+                <tr>
+                    <td>Signed out unexpectedly</td>
+                    <td>The login token has expired. Sign in again, or increase <code>JWT_EXPIRES_IN</code> in the backend <code>.env</code>.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="api-reference">
+        <h2>15. API Reference</h2>
+        <p>This section covers the request and response formats you will work with most often. The complete, always-current reference for all <strong>166 endpoints</strong> is the Swagger UI served by your own backend:</p>
+<pre><code>http://localhost:5008/api/docs</code></pre>
+        <p>Swagger is generated from the source code, so it can never drift out of date. Use <strong>Authorize</strong> there to paste a token and try any endpoint live.</p>
+
+        <h3>Conventions</h3>
+        <table class="doc-table">
+            <thead><tr><th>Item</th><th>Value</th></tr></thead>
+            <tbody>
+                <tr><td>Base path</td><td><code>/api</code></td></tr>
+                <tr><td>Version</td><td>In the URL: <code>/api/v1/...</code></td></tr>
+                <tr><td>Auth header</td><td><code>Authorization: Bearer &lt;access_token&gt;</code></td></tr>
+                <tr><td>Content type</td><td><code>application/json</code> (uploads use <code>multipart/form-data</code>)</td></tr>
+                <tr><td>IDs</td><td>UUID v4</td></tr>
+                <tr><td>Timestamps</td><td>ISO 8601 UTC, e.g. <code>2026-09-19T10:30:00.000Z</code></td></tr>
+            </tbody>
+        </table>
+
+        <h3>The response envelope</h3>
+        <p>Every response — success or failure — uses the same outer shape.</p>
+
+        <h4>Single item</h4>
+<pre><code>{
+  "success": true,
+  "status_code": 200,
+  "data": { }
+}</code></pre>
+
+        <h4>Lists</h4>
+        <p>List endpoints add a <code>pagination</code> block. Some also add <code>counts</code>, which are totals across the whole resource and are <em>not</em> affected by your current search filter.</p>
+<pre><code>{
+  "success": true,
+  "status_code": 200,
+  "data": [ ],
+  "pagination": {
+    "total": 120,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 6,
+    "has_next": true,
+    "has_prev": false,
+    "counts": {
+      "total_non_deleted": 120,
+      "published_live": 98,
+      "draft": 15,
+      "pending": 7
+    }
+  }
+}</code></pre>
+
+        <p>Common list query parameters: <code>page</code>, <code>limit</code>, <code>search</code>, <code>sort</code>, <code>status</code>.</p>
+
+        <h4>Errors</h4>
+<pre><code>{
+  "success": false,
+  "status_code": 401,
+  "error": "Unauthorized",
+  "message": "Authorization token is missing. Send a Bearer token in the Authorization header.",
+  "timestamp": "2026-09-19T10:30:00.000Z"
+}</code></pre>
+
+        <p>Validation failures return <code>message</code> as an <strong>array</strong> of strings, one per invalid field:</p>
+<pre><code>{
+  "success": false,
+  "status_code": 400,
+  "error": "Validation Error",
+  "message": [
+    "fullName must be longer than or equal to 2 characters",
+    "otp_token must be a string"
+  ],
+  "timestamp": "2026-09-19T10:30:00.000Z"
+}</code></pre>
+
+        <div class="alert">
+            <strong>Handling errors in your client:</strong> always check <code>success</code> first, then read <code>status_code</code>. Remember that <code>message</code> is a <em>string</em> for normal errors but an <em>array</em> for validation errors — handle both.
+        </div>
+
+        <table class="doc-table">
+            <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+            <tbody>
+                <tr><td><code>200</code> / <code>201</code></td><td>Success</td></tr>
+                <tr><td><code>400</code></td><td>Validation failed, or a feature is not configured (e.g. SMTP)</td></tr>
+                <tr><td><code>401</code></td><td>Missing, invalid or expired token</td></tr>
+                <tr><td><code>403</code></td><td>Signed in, but not allowed — or an expired signed book link</td></tr>
+                <tr><td><code>404</code></td><td>Not found</td></tr>
+                <tr><td><code>409</code></td><td>Conflict, e.g. the email is already registered</td></tr>
+                <tr><td><code>413</code></td><td>Upload too large — see the nginx note in section 13</td></tr>
+                <tr><td><code>429</code></td><td>Rate limit reached</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Multilingual fields</h3>
+        <p>Titles, names and descriptions are objects keyed by language code, not plain strings. Which languages are accepted comes from <code>APP_LOCALES</code>.</p>
+<pre><code>{
+  "title": {
+    "en": "Moby Dick",
+    "bn": "মোবি ডিক",
+    "ar": "موبي ديك",
+    "hi": "मोबी डिक"
+  }
+}</code></pre>
+        <p>You do not have to send every language. Any you leave out come back as an empty string.</p>
+
+        <h3>Authentication</h3>
+
+        <h4>Sign-up is a three-step flow</h4>
+        <p>Registration is protected by an email one-time code, so it takes three calls.</p>
+
+        <div class="alert-danger">
+            <strong>SMTP is required for sign-up.</strong> Step 1 returns <code>400 "SMTP not configured"</code> until you set <code>MAIL_ENABLED=true</code> and fill in the <code>SMTP_*</code> values (section 13, step 7). Existing accounts can still log in without SMTP — only new registrations are blocked.
+        </div>
+
+        <p><strong>Step 1 — request a code.</strong> <code>POST /api/v1/auth/otp/send</code></p>
+<pre><code>{
+  "email": "jane.doe@example.com",
+  "purpose": "register"
+}</code></pre>
+        <p><code>purpose</code> is one of <code>register</code>, <code>forgot_password</code> or <code>email_verify</code>.</p>
+
+        <p><strong>Step 2 — verify the code.</strong> <code>POST /api/v1/auth/otp/verify</code></p>
+<pre><code>{
+  "email": "jane.doe@example.com",
+  "purpose": "register",
+  "otp": "482913"
+}</code></pre>
+        <p>The response contains an <code>otp_token</code>. It is short-lived — its lifetime is <code>OTP_TOKEN_EXPIRES_IN</code>, 10 minutes by default.</p>
+
+        <p><strong>Step 3 — create the account.</strong> <code>POST /api/v1/auth/register</code></p>
+<pre><code>{
+  "fullName": "Jane Doe",
+  "email": "jane.doe@example.com",
+  "password": "StrongPa$$123",
+  "otp_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+
+  "device_id": "9774d56d682e549c",
+  "fcm_token": "fKx9...",
+  "platform": "android",
+  "device_name": "Google Pixel 8",
+  "app_version": "1.0.0"
+}</code></pre>
+        <div class="alert">
+            <strong>Note the spelling:</strong> this field is <code>fullName</code> in camelCase, while most other fields use snake_case. Sending <code>full_name</code> returns a validation error.
+            <br><br>
+            The <code>device_*</code> and <code>fcm_token</code> fields are optional. Send them to register the device for push notifications.
+        </div>
+
+        <h4>Login</h4>
+        <p><code>POST /api/v1/auth/login</code></p>
+<pre><code>{
+  "email": "jane.doe@example.com",
+  "password": "StrongPa$$123"
+}</code></pre>
+
+        <p>Response:</p>
+<pre><code>{
+  "success": true,
+  "status_code": 201,
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "sub": "84138aab-093d-467d-834d-b902a2738c71",
+      "email": "jane.doe@example.com",
+      "roles": ["user"]
+    },
+    "subscription": {
+      "is_active": false,
+      "plan": "free",
+      "subscription_id": null,
+      "plan_id": null,
+      "plan_slug": null,
+      "plan_name": null,
+      "status": null,
+      "billing_cycle": null,
+      "starts_at": null,
+      "expires_at": null,
+      "gateway": null,
+      "can_read_subscription_books": false
+    }
+  }
+}</code></pre>
+
+        <p><code>user.sub</code> is the user's UUID. Store both tokens; send the access token on every request.</p>
+
+        <h4>Refreshing an expired token</h4>
+        <p>Access tokens expire after <code>JWT_EXPIRES_IN</code> (4 hours by default). When a request returns <strong>401</strong>, exchange your refresh token for a new pair rather than forcing the user to log in again.</p>
+        <p><code>POST /api/v1/auth/refresh</code></p>
+<pre><code>{
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}</code></pre>
+
+        <p>Other auth endpoints: <code>POST /auth/logout</code>, <code>POST /auth/forgot-password</code>, <code>POST /auth/reset-password</code>, <code>POST /auth/change-password</code>, <code>POST /auth/firebase</code> (social sign-in).</p>
+
+        <h3>Reading the catalogue</h3>
+
+        <h4>Book list</h4>
+        <p><code>GET /api/v1/books?page=1&amp;limit=20&amp;search=moby</code> — returns the paginated envelope shown above.</p>
+
+        <h4>Book details</h4>
+        <p><code>GET /api/v1/books/{id}</code> — send the user's token so the response reflects what <em>that</em> reader is entitled to.</p>
+<pre><code>{
+  "success": true,
+  "status_code": 200,
+  "data": {
+    "id": "9e3fffc1-edb0-4390-b33e-52a3fd239ef5",
+    "title": { "en": "Moby Dick", "bn": "মোবি ডিক" },
+    "description": { "en": "..." },
+    "author": {
+      "id": "…", "name": { "en": "Herman Melville" },
+      "image_url": "https://api.example.com/uploads/authors/x.jpg",
+      "total_books": 12
+    },
+    "file_path": "https://api.example.com/uploads/books/x.epub",
+    "preview_file_path": "",
+    "cover_url": "https://api.example.com/uploads/covers/x.jpg",
+    "total_chapters": 135,
+    "is_favorite": false,
+    "language": "English",
+    "dominant_color": "#2B3A42",
+    "categories": [ { "id": "…", "name": { "en": "Fiction" } } ],
+    "access_control": {
+      "can_access": true,
+      "access_type": "purchase",
+      "purchased_at": "2026-09-01T10:00:00.000Z",
+      "expires_at": null,
+      "is_free": false,
+      "is_ads_supported": false,
+      "is_subscribable": true,
+      "is_rentable": true,
+      "is_lifetime_purchasable": true
+    },
+    "pricing": {
+      "currency": "USD",
+      "rent_price": 2.99,
+      "rent_discount_percent": 0,
+      "lifetime_price": 9.99,
+      "lifetime_discount_percent": 0,
+      "rent_duration_in_days": 30
+    },
+    "review": { }
+  }
+}</code></pre>
+
+        <div class="alert">
+            <strong>Why <code>file_path</code> may be an empty string.</strong> The book file link is only included for a reader who is entitled to that title — one who bought it, rented it, or has an active subscription — plus anyone at all for free and ad-supported books. For everyone else it is <code>""</code>, which is the same value a book with no file uploaded yet returns.
+            <br><br>
+            Use <code>access_control.can_access</code> to decide whether to show the reader or the purchase screen. Do not treat an empty <code>file_path</code> as an error.
+        </div>
+
+        <h3>Creating content (admin)</h3>
+        <p>Admin endpoints need a token belonging to a user with the <code>admin</code> role. Multilingual fields are sent as objects.</p>
+        <p><code>POST /api/v1/categories</code></p>
+<pre><code>{
+  "name": { "en": "Fiction", "bn": "কল্পকাহিনী" },
+  "description": { "en": "Novels and short stories" },
+  "slug": "fiction"
+}</code></pre>
+
+        <p>Response:</p>
+<pre><code>{
+  "success": true,
+  "status_code": 201,
+  "data": {
+    "id": "e00f2495-11d0-4bc0-abc4-5cd3ceb0f440",
+    "type": null,
+    "name": { "en": "Fiction", "bn": "কল্পকাহিনী", "ar": "" },
+    "thumbnail": null,
+    "color": null,
+    "description": { "en": "Novels and short stories", "bn": "", "ar": "" },
+    "total_books": 0,
+    "see_all": false,
+    "books": []
+  }
+}</code></pre>
+
+        <h3>File uploads</h3>
+        <p>Uploads use <code>multipart/form-data</code>, not JSON.</p>
+<pre><code>POST /api/v1/uploads/file
+Authorization: Bearer &lt;token&gt;
+Content-Type: multipart/form-data
+
+file: &lt;binary&gt;</code></pre>
+        <p>Limits: images up to <strong>10 MB</strong>, EPUB/PDF up to <strong>100 MB</strong>. Exceeding the limit returns <strong>413</strong> — if that happens on a server, raise <code>client_max_body_size</code> in nginx as well (section 13).</p>
+
+        <h3>Endpoint groups</h3>
+        <table class="doc-table">
+            <thead><tr><th>Prefix</th><th>Purpose</th></tr></thead>
+            <tbody>
+                <tr><td><code>/auth</code></td><td>Register, login, refresh, OTP, password reset</td></tr>
+                <tr><td><code>/users</code></td><td>Profiles, roles, admin user management</td></tr>
+                <tr><td><code>/books</code></td><td>Catalogue, uploads, publishing workflow</td></tr>
+                <tr><td><code>/authors</code>, <code>/publishers</code>, <code>/categories</code>, <code>/tags</code></td><td>Catalogue metadata</td></tr>
+                <tr><td><code>/book-access</code></td><td>What a reader may open</td></tr>
+                <tr><td><code>/orders</code>, <code>/payments</code></td><td>Purchases, rentals, gateways</td></tr>
+                <tr><td><code>/subscriptions</code>, <code>/subscription-plans</code></td><td>Plans and active subscriptions</td></tr>
+                <tr><td><code>/reading</code></td><td>Progress, sessions, highlights</td></tr>
+                <tr><td><code>/engagement</code></td><td>Reviews and comments</td></tr>
+                <tr><td><code>/home</code>, <code>/home-sections</code>, <code>/home-banner</code></td><td>App home screen and admin dashboard</td></tr>
+                <tr><td><code>/notifications</code></td><td>In-app records and push</td></tr>
+                <tr><td><code>/legal-pages</code>, <code>/app-version</code></td><td>Policy pages and the update prompt</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="database-schema">
+        <h2>16. Database Schema</h2>
+        <p>Bookly uses PostgreSQL with <strong>44 tables</strong>. You normally never touch them directly — the backend creates everything on first run — but this section is here for anyone integrating with the data or reviewing the structure before deploying.</p>
+
+        <div class="alert">
+            <strong>You do not need to create these tables by hand.</strong> Set <code>DB_SYNC=true</code> for the first run and the backend builds the entire schema from its entity definitions. See section 13, step 4.
+        </div>
+
+        <h3>The schema file</h3>
+        <p>A complete, ready-to-run SQL file ships with the backend at <code>database/schema.sql</code>. Use it if you prefer to create the schema manually, or to review it up front:</p>
+<pre><code>createdb bookly
+psql -d bookly -f database/schema.sql</code></pre>
+        <p>Set <code>DB_SYNC=false</code> in your <code>.env</code> afterwards, so the backend does not try to manage the schema as well.</p>
+
+        <h3>Conventions</h3>
+        <ul class="step-list">
+            <li>Every main table has <code>id</code> (UUID v4), <code>is_deleted</code>, <code>created_at</code> and <code>updated_at</code>.</li>
+            <li>Deletes are <strong>soft</strong> — rows are flagged with <code>is_deleted = true</code> rather than removed, so nothing is lost by accident.</li>
+            <li>Column names are <code>snake_case</code>.</li>
+            <li>Multilingual values are stored as <code>jsonb</code>, e.g. <code>{"en": "Moby Dick", "bn": "মোবি ডিক"}</code>.</li>
+            <li>Money is <code>numeric</code>, never floating point.</li>
+            <li>Timestamps are <code>timestamptz</code> (UTC).</li>
+        </ul>
+
+        <h3>Tables by area</h3>
+        <table class="doc-table">
+            <thead><tr><th>Area</th><th>Tables</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Accounts</strong></td>
+                    <td><code>users</code>, <code>roles</code>, <code>user_roles</code>, <code>user_devices</code>, <code>email_otps</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Catalogue</strong></td>
+                    <td><code>books</code>, <code>authors</code>, <code>publishers</code>, <code>categories</code>, <code>tags</code>, <code>book_authors</code>, <code>book_categories</code>, <code>book_publishers</code>, <code>book_tags</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Access &amp; commerce</strong></td>
+                    <td><code>book_access</code>, <code>orders</code>, <code>order_items</code>, <code>payment_products</code>, <code>book_payment_products</code>, <code>payment_transactions</code>, <code>payment_gateway_configs</code>, <code>payment_gateway_regions</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Subscriptions</strong></td>
+                    <td><code>subscriptions</code>, <code>subscription_plans</code>, <code>subscription_plan_payment_products</code>, <code>subscription_event_logs</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Reading</strong></td>
+                    <td><code>reading_progress</code>, <code>reading_sessions</code>, <code>highlights</code>, <code>book_favorites</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Engagement</strong></td>
+                    <td><code>reviews</code>, <code>review_votes</code>, <code>comments</code>, <code>comment_likes</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Requests</strong></td>
+                    <td><code>audiobook_requests</code>, <code>author_requests</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Merchandising</strong></td>
+                    <td><code>home_banners</code>, <code>home_sections</code>, <code>legal_pages</code>, <code>app_version_configs</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Notifications</strong></td>
+                    <td><code>notifications</code>, <code>notification_broadcasts</code>, <code>scheduled_notifications</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Audit</strong></td>
+                    <td><code>admin_activity_logs</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Key tables</h3>
+
+        <h4><code>users</code></h4>
+        <table class="doc-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>uuid</td><td>Primary key</td></tr>
+                <tr><td><code>full_name</code></td><td>varchar</td><td>Required</td></tr>
+                <tr><td><code>email</code></td><td>varchar</td><td>Required, unique</td></tr>
+                <tr><td><code>password_hash</code></td><td>varchar</td><td>bcrypt. Never returned by the API</td></tr>
+                <tr><td><code>refresh_token_hash</code></td><td>varchar</td><td>Hashed refresh token. Never returned by the API</td></tr>
+                <tr><td><code>auth_provider</code></td><td>enum</td><td><code>email</code>, or a social provider</td></tr>
+                <tr><td><code>firebase_uid</code></td><td>varchar</td><td>Set for Firebase sign-in</td></tr>
+                <tr><td><code>subscription_plan</code></td><td>enum</td><td><code>free</code> or <code>premium</code></td></tr>
+                <tr><td><code>preferred_language</code></td><td>varchar</td><td>Locale code</td></tr>
+                <tr><td><code>is_active</code></td><td>boolean</td><td>Deactivated accounts cannot log in</td></tr>
+            </tbody>
+        </table>
+        <p>Roles are many-to-many via <code>user_roles</code> → <code>roles</code>, so one account can hold several roles.</p>
+
+        <h4><code>books</code></h4>
+        <table class="doc-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td><code>title</code></td><td>jsonb</td><td>Required, multilingual</td></tr>
+                <tr><td><code>description</code></td><td>jsonb</td><td>Multilingual</td></tr>
+                <tr><td><code>file_url</code></td><td>varchar</td><td>EPUB location</td></tr>
+                <tr><td><code>pdf_url</code></td><td>varchar</td><td>PDF, used when there is no EPUB</td></tr>
+                <tr><td><code>sample_file_url</code></td><td>varchar</td><td>Free preview</td></tr>
+                <tr><td><code>cover_image_url</code></td><td>varchar</td><td>Cover image</td></tr>
+                <tr><td><code>dominant_color</code></td><td>varchar</td><td>Hex colour used by the app's reader theme</td></tr>
+                <tr><td><code>status</code></td><td>enum</td><td>See the publishing states below</td></tr>
+                <tr><td><code>is_free</code>, <code>is_ads_supported</code>, <code>is_subscribable</code>, <code>is_rentable</code>, <code>is_lifetime_purchasable</code></td><td>boolean</td><td>How the book may be obtained</td></tr>
+                <tr><td><code>base_price</code>, <code>rent_price</code></td><td>numeric</td><td>Lifetime and rental pricing</td></tr>
+                <tr><td><code>rent_duration_in_days</code></td><td>integer</td><td>Rental length</td></tr>
+            </tbody>
+        </table>
+
+        <h4><code>book_access</code> — who may read what</h4>
+        <p>This is the table the reader's entitlement check reads. A row grants one user access to one book.</p>
+        <table class="doc-table">
+            <thead><tr><th>Column</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td><code>user_id</code>, <code>book_id</code></td><td>Who, and which book</td></tr>
+                <tr><td><code>access_type</code></td><td><code>free</code>, <code>subscription</code> or <code>single_buy</code></td></tr>
+                <tr><td><code>granted_at</code></td><td>When access started</td></tr>
+                <tr><td><code>expires_at</code></td><td><code>NULL</code> means permanent; a date means it is a rental</td></tr>
+                <tr><td><code>order_id</code>, <code>subscription_id</code></td><td>What paid for it</td></tr>
+                <tr><td><code>is_active</code></td><td>Access can be revoked without deleting the row</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Enum values</h3>
+        <p>These are real PostgreSQL enum types, so the database itself rejects anything outside the list.</p>
+        <table class="doc-table">
+            <thead><tr><th>Type</th><th>Values</th></tr></thead>
+            <tbody>
+                <tr><td>Book status</td><td><code>draft</code> · <code>pending</code> · <code>pending_review</code> · <code>published</code> · <code>scheduled</code> · <code>rejected</code> · <code>archived</code></td></tr>
+                <tr><td>Book access type</td><td><code>free</code> · <code>subscription</code> · <code>single_buy</code></td></tr>
+                <tr><td>Order kind</td><td><code>book</code> · <code>subscription</code></td></tr>
+                <tr><td>Order / transaction status</td><td><code>pending</code> · <code>paid</code> · <code>failed</code> · <code>refunded</code></td></tr>
+                <tr><td>Billing cycle</td><td><code>weekly</code> · <code>monthly</code> · <code>six_monthly</code> · <code>yearly</code></td></tr>
+                <tr><td>Package billing type</td><td><code>one_time</code> · <code>recurring</code></td></tr>
+                <tr><td>Purchase type</td><td><code>rent</code> · <code>lifetime</code> · <code>subscription_weekly</code> · <code>subscription_monthly</code> · <code>subscription_six_monthly</code> · <code>subscription_yearly</code></td></tr>
+                <tr><td>Payment gateway</td><td><code>piprapay</code> · <code>bkash</code> · <code>nagad</code> · <code>sslcommerz</code> · <code>google_play</code> · <code>apple</code> · <code>stripe</code> · <code>revenuecat</code></td></tr>
+                <tr><td>Highlight type</td><td><code>highlight</code> · <code>bookmark</code> · <code>note</code></td></tr>
+                <tr><td>Banner type</td><td><code>hero</code> · <code>feature</code> · <code>popup</code></td></tr>
+                <tr><td>OTP purpose</td><td><code>register</code> · <code>forgot_password</code> · <code>email_verify</code></td></tr>
+                <tr><td>Comment status</td><td><code>active</code> · <code>hidden</code> · <code>flagged</code> · <code>deleted</code></td></tr>
+                <tr><td>App version platform</td><td><code>android</code> · <code>ios</code></td></tr>
+            </tbody>
+        </table>
+
+        <h3>Backing up</h3>
+<pre><code># Back up
+pg_dump -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" > bookly-backup.sql
+
+# Restore
+psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f bookly-backup.sql</code></pre>
+        <div class="alert">
+            <strong>Remember the files too.</strong> The database stores only the <em>paths</em> to covers and book files. If you are on local disk storage, back up the <code>uploads/</code> folder alongside the database or your restored catalogue will have no files. With Cloudflare R2 or Bunny the files already live in your bucket.
+        </div>
+    </section>
+
+    <section id="faq">
+        <h2>17. FAQ &amp; Common Build Errors</h2>
+        <p>The problems buyers hit most often, and what fixes them. If your issue is not here, please <a href="#support">get in touch</a> — we are happy to help.</p>
+
+        <h3>Before anything else</h3>
+        <div class="alert">
+            Most build failures come from a version mismatch. Confirm these first:
+            <ul class="step-list" style="margin-top: 10px;">
+                <li><strong>Java 21.0.9</strong> — run <code>java -version</code>. Other major versions are the single most common cause of Android build errors.</li>
+                <li><strong>Flutter 3.44.x or newer</strong> — run <code>flutter --version</code>.</li>
+                <li><strong>Node.js 20 LTS or newer</strong> — run <code>node -v</code>, for the backend and admin panel.</li>
+                <li><strong>PostgreSQL 14 or newer</strong> — run <code>psql --version</code>.</li>
+                <li>Then run <code>flutter doctor</code> and resolve anything it flags.</li>
+            </ul>
+        </div>
+
+        <h3>Flutter app — build errors</h3>
+
+        <h4>Unsupported class file major version / Gradle fails immediately</h4>
+        <p>Your Java version is wrong. Install <strong>Java 21.0.9</strong> and point Android Studio at it in <em>Settings &rarr; Build, Execution, Deployment &rarr; Build Tools &rarr; Gradle &rarr; Gradle JDK</em>. Then:</p>
+<pre><code>flutter clean
+flutter pub get</code></pre>
+
+        <h4>Execution failed for task ':app:processDebugGoogleServices'</h4>
+        <p><code>google-services.json</code> is missing, or its package name does not match your app. Download a fresh one from your Firebase project and place it at <code>android/app/google-services.json</code>. The <code>package_name</code> inside it must equal the <code>applicationId</code> in <code>android/app/build.gradle.kts</code>. See section 4.</p>
+
+        <h4>Could not resolve all files for configuration / Gradle download stalls</h4>
+        <p>Usually a network or cache problem. Clear the caches and retry:</p>
+<pre><code>cd android
+./gradlew clean
+cd ..
+flutter clean
+flutter pub get</code></pre>
+        <p>If it still fails, delete the Gradle cache (<code>~/.gradle/caches</code>) and let it download again.</p>
+
+        <h4>Version solving failed / dependency conflicts after <code>flutter pub get</code></h4>
+<pre><code>flutter clean
+rm pubspec.lock
+flutter pub get</code></pre>
+        <p>The lock file ships with the package so you get the exact versions we tested. Only delete it if you have deliberately changed a dependency.</p>
+
+        <h4>Minimum supported Gradle version / Android Gradle Plugin errors</h4>
+        <p>Open the project with the bundled Gradle wrapper rather than a system Gradle. Always open the <strong>project root</strong> in Android Studio, not the <code>android/</code> folder on its own.</p>
+
+        <h4>iOS: CocoaPods errors or missing pods</h4>
+<pre><code>cd ios
+pod repo update
+pod install --repo-update
+cd ..
+flutter clean
+flutter pub get</code></pre>
+        <p>Requires CocoaPods 1.16.2 or newer (<code>pod --version</code>). On Apple Silicon, if <code>pod install</code> fails try <code>arch -x86_64 pod install</code>.</p>
+
+        <h4>iOS: Signing for "Runner" requires a development team</h4>
+        <p>Open <code>ios/Runner.xcworkspace</code> in Xcode, select the <strong>Runner</strong> target, go to <em>Signing &amp; Capabilities</em> and choose your Apple developer team. See section 12.</p>
+
+        <h4>The app builds but shows a blank screen or no books</h4>
+        <p>It cannot reach the backend. Check in this order:</p>
+        <ul class="step-list">
+            <li>Is the backend running? Open <code>/api/docs</code> in a browser.</li>
+            <li>Is the API address in the app correct (section 8)?</li>
+            <li>On a real device, <code>localhost</code> means <em>the phone</em>. Use your computer's LAN IP or a public address.</li>
+            <li>Android blocks plain HTTP by default — use HTTPS for anything other than local testing.</li>
+            <li>Have any books been added <strong>and published</strong> in the admin panel? Drafts do not appear in the app.</li>
+        </ul>
+
+        <h3>Backend</h3>
+
+        <h4>Sign-up fails with 400 "SMTP not configured"</h4>
+        <p>Registration sends an email one-time code, so it needs a working mail server. Set <code>MAIL_ENABLED=true</code> and fill in the <code>SMTP_*</code> values (section 13, step 7). Existing accounts can still log in without SMTP — only new sign-ups are blocked.</p>
+
+        <h4>No tables were created</h4>
+        <p><code>DB_SYNC=true</code> is required on the first run. Alternatively load <code>database/schema.sql</code> by hand (section 16).</p>
+
+        <h4>"Superadmin bootstrap complete" never appears, and I cannot log in</h4>
+        <p>The first admin is only created when the database has <strong>no users at all</strong>. If you have already created one, the bootstrap is skipped by design. Either use the original account, or start from an empty database.</p>
+
+        <h4>Warning at startup: "Firebase is not configured"</h4>
+        <p>Expected when you have not set up push notifications. The server runs normally; push and Firebase sign-in are simply disabled until you add the <code>FIREBASE_*</code> values.</p>
+
+        <h4>Error: listen EADDRINUSE — port already in use</h4>
+<pre><code># See what is using the port
+lsof -i :5008
+# Stop it, or pick another port in .env
+PORT=5009</code></pre>
+
+        <h4>Files keep landing in <code>uploads/</code> instead of Cloudflare R2</h4>
+        <p>R2 needs <strong>all</strong> of <code>CLOUDFLARE_R2_ACCESS_KEY_ID</code>, <code>CLOUDFLARE_R2_SECRET_ACCESS_KEY</code>, <code>CLOUDFLARE_R2_BUCKET</code>, <code>CLOUDFLARE_R2_ENDPOINT</code> and <code>CLOUDFLARE_R2_PUBLIC_URL</code>. If one is missing it falls back to local disk <em>without an error message</em>. <code>CLOUDFLARE_R2_PUBLIC_URL</code> is the one people forget.</p>
+
+        <h4>413 when uploading a book</h4>
+        <p>Raise <code>client_max_body_size</code> in nginx to at least your <code>HTTP_BODY_LIMIT</code> (section 13, step 9), then reload nginx.</p>
+
+        <h4>429 Too Many Requests when logging in</h4>
+        <p>The brute-force limiter. Wait a minute, or raise <code>AUTH_RATE_LIMIT_MAX</code>. If <em>all</em> your users are being limited at once, nginx is not forwarding <code>X-Forwarded-For</code>, so everyone looks like one visitor — see section 13, step 9.</p>
+
+        <h4>PM2 starts, then the app immediately stops</h4>
+<pre><code>pm2 logs bookly_backend --lines 50</code></pre>
+        <p>Usually a missing <code>.env</code> in the folder named by <code>cwd</code> in <code>prod.config.js</code>, or wrong database credentials.</p>
+
+        <h3>Admin panel</h3>
+
+        <h4>Every page is empty and the browser console shows 404s</h4>
+        <p><code>NEXT_PUBLIC_API_URL</code> is missing the <code>/api/v1</code> ending. It must be, for example, <code>https://api.your-domain.com/api/v1</code>. Fix it and run <code>npm run build</code> again.</p>
+
+        <h4>Covers and images do not load</h4>
+        <p>Either <code>NEXT_PUBLIC_IMAGE_URL</code> wrongly ends in <code>/uploads</code> (the paths already contain it), or your CDN hostname is not allowed — add it to <code>NEXT_PUBLIC_EXTRA_IMAGE_HOSTS</code>.</p>
+
+        <h4>CORS errors in the console</h4>
+        <p>Add the admin panel's address to <code>CORS_ORIGINS</code> in the <strong>backend</strong> <code>.env</code>, then restart the backend.</p>
+
+        <h4>I changed <code>.env</code> but nothing happened</h4>
+        <p><code>NEXT_PUBLIC_*</code> values are compiled into the browser bundle. Run <code>npm run build</code> and restart.</p>
+
+        <h3>General questions</h3>
+
+        <h4>Do I need the backend to run the app?</h4>
+        <p>Yes. The app is a client for the Bookly API — the catalogue, accounts, purchases and reading progress all live there.</p>
+
+        <h4>Can I host the backend and admin panel on the same server?</h4>
+        <p>Yes. Run them on different ports (5008 and 4000 by default) and put nginx in front of both.</p>
+
+        <h4>Can I use MySQL instead of PostgreSQL?</h4>
+        <p>No. The schema relies on PostgreSQL-specific features such as <code>jsonb</code> for multilingual fields and native enum types.</p>
+
+        <h4>Which languages are supported?</h4>
+        <p>English, Bangla, Arabic and Hindi out of the box, including right-to-left layout for Arabic. Set the active list in <code>APP_LOCALES</code> (backend) and <code>NEXT_PUBLIC_APP_LOCALES</code> (admin panel) — they must match. Adding another language is covered in section 9.</p>
+
+        <h4>How do I add a book?</h4>
+        <p>In the admin panel: <em>Books &rarr; Add Book</em>. Upload the EPUB or PDF and a cover, fill in the details for each language, set pricing, then publish. Draft books do not appear in the app.</p>
+
+        <h4>Do I have to use PipraPay?</h4>
+        <p>No. It is off by default. The payment layer is provider-based, and Google Play / Apple in-app purchases are supported separately.</p>
+
+        <h4>Where are uploaded files stored?</h4>
+        <p>Cloudflare R2, Bunny.net, or the local <code>uploads/</code> folder — whichever is configured first. See section 13, step 6.</p>
+
+        <h4>How do I stop people sharing book download links?</h4>
+        <p>Set <code>PROTECT_BOOK_FILES=true</code>. Links then carry an expiring signature and cannot be reused elsewhere. Your apps need no changes. Note that paid books are already withheld from readers who have not bought them.</p>
+
+        <h4>Can I remove AdMob or in-app purchases?</h4>
+        <p>Yes — both are configurable. See sections 10 and 11.</p>
+
+        <div class="alert">
+            <strong>Still stuck?</strong> Send us the exact error text plus the output of <code>flutter doctor -v</code> (app issues) or <code>pm2 logs</code> (backend issues), and we will get you moving. Contact details are in <a href="#support">section 18</a>.
+        </div>
+    </section>
+
     <section id="support">
-        <h2>13. Support</h2>
+        <h2>18. Support</h2>
         <p>If you need help, reach out using any of the channels below.</p>
         <ul class="step-list">
             <li>
@@ -618,10 +1692,12 @@
     </section>
 
         <section id="changelog">
-        <h2>14. Changelog</h2>
+        <h2>19. Changelog</h2>
 
-        <h3 style="color: var(--primary); margin-bottom: 10px;">Version 1.1.1 – 5 Aug 2026</h3>
+        <h3 style="color: var(--primary); margin-bottom: 10px;">Version 1.1.1 – 19 Sep 2026</h3>
         <ul class="step-list">
+            <li><strong>New:</strong> Backend API (NestJS + PostgreSQL) now included in the package. See section 13.</li>
+            <li><strong>New:</strong> Admin panel (Next.js) now included in the package. See section 14.</li>
             <li><strong>New:</strong> Push notification support added.</li>
             <li><strong>New:</strong> Premium PDF reader plugin integrated.</li>
             <li><strong>Improvement:</strong> Sign Up flow updated — email sign up now uses OTP verification sent over SMTP, replacing the previous Firebase email/password sign up.</li>

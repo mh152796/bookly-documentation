@@ -151,3 +151,38 @@ kbd {
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
+
+/* ---------- Tables (backend / admin panel configuration reference) ---------- */
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 0.95rem;
+}
+.doc-table th,
+.doc-table td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.doc-table th {
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  font-weight: 600;
+}
+.doc-table td code {
+  white-space: nowrap;
+}
+.doc-table tr:nth-child(even) td {
+  background-color: #fcfcfc;
+}
+
+/* Success / positive callout, same shape as .alert */
+.alert-success {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 0 4px 4px 0;
+}
